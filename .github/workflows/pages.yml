@@ -23,18 +23,18 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+      - name: Prepare site
+        run: |
+          mkdir dist
+          cp index.html dist/index.html
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-          with:
-            enablement: true
+        with:
+          enablement: true
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
-          exclude:
-            - .github/**
-            - README.md
-            - site-source.tar.gz.b64
+          path: ./dist
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
