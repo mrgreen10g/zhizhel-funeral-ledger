@@ -26,9 +26,8 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 .stat-card{min-width:0;padding:13px 15px;border:1px solid #c19a5866;border-radius:5px;background:linear-gradient(145deg,#3a2419dd,#1c110ddd);box-shadow:inset 0 0 18px #c19a580c}
 .stat-label{display:block;margin-bottom:8px;color:#c5a77a;font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase}
 .stat-number{display:block;color:#f0dfbd;font:600 32px/1 var(--display);font-variant-numeric:tabular-nums}
-.stat-values{display:grid;gap:4px}
-.stat-line{display:flex;justify-content:space-between;gap:8px;color:#c7ad88;font:12px/1.25 var(--display)}
-.stat-line strong{color:#f0dfbd;font:600 13px var(--display);white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat-money{display:block;color:#f0dfbd;font:600 17px/1.35 var(--display);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.stats-note{max-width:1050px;margin:8px auto 0;padding:0 20px;color:#a98e70;text-align:center;font:italic 12px var(--display)}
 @media(max-width:760px){.ledger-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat-card{padding:11px 12px}.stat-line{font-size:11px}.stat-line strong{font-size:12px}}
 
 @media(max-width:620px){header{align-items:flex-start;flex-direction:column}.head-actions{width:100%}.head-actions .btn{flex:1}.book{padding:10px 8px 10px 15px}.page{min-height:530px;padding:22px 18px}.entry-name{font-size:23px}.form{grid-template-columns:1fr}.money{grid-template-columns:1fr}.wide{grid-column:auto}}
@@ -42,10 +41,11 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 <header><div><p class="eyebrow">Личный реестр скорби</p><h1>Похоронная книга Жижеля</h1><p class="subtitle">Память — товар, а горе — ремесло.</p></div><div class="head-actions"><button class="btn" id="add">＋ Записать имя</button><button class="btn secondary" id="export">Экспорт</button><button class="btn secondary" id="import">Импорт</button><input id="file" type="file" accept=".json,application/json" hidden></div></header>
 <section class="ledger-stats" aria-label="Финансовая сводка">
   <article class="stat-card"><span class="stat-label">Людей в книге</span><strong class="stat-number" id="peopleCount">0</strong></article>
-  <article class="stat-card"><span class="stat-label">Заработано</span><div class="stat-values" id="earnedTotal"></div></article>
-  <article class="stat-card"><span class="stat-label">Отдано помощнику</span><div class="stat-values" id="spentTotal"></div></article>
-  <article class="stat-card"><span class="stat-label">Остаток после трат</span><div class="stat-values" id="netTotal"></div></article>
+  <article class="stat-card"><span class="stat-label">Всего получено</span><strong class="stat-money" id="earnedTotal">0 медных монет</strong></article>
+  <article class="stat-card"><span class="stat-label">Отдано помощнику</span><strong class="stat-money" id="spentTotal">0 медных монет</strong></article>
+  <article class="stat-card"><span class="stat-label">Чистый остаток</span><strong class="stat-money" id="netTotal">0 медных монет</strong></article>
 </section>
+<p class="stats-note">Все суммы сведены по курсу D&amp;D: 10 медных = 1 серебряная, 2 электрумовые = 1 золотая, 10 золотых = 1 платиновая.</p>
 <main><p class="intro">✦ Имена, которые ещё можно оплакать ✦</p><section class="book"><div class="page"><div class="page-top"><span id="pageLabel">Лист I</span><span id="total">0 записей</span></div><div class="page-title"><span class="orn">❧</span><h2>Реестр скорбящих</h2><p>Каждое имя заслуживает последнего свидетеля</p></div><div id="entries" class="entries"></div><div id="empty" class="empty"><div class="symbol">❦</div><h3>На этом листе пока тишина</h3><p>Оставьте здесь первое имя.</p></div><div class="page-foot"><span>Архив Жижеля</span><span id="footPage">I</span></div></div></section><nav class="pagination"><button class="arrow" id="prev" aria-label="Предыдущая страница">‹</button><div class="counter"><span id="counter">Страница 1 из 1</span><small>Листайте книгу</small></div><button class="arrow" id="next" aria-label="Следующая страница">›</button></nav></main><footer>Записи хранятся в этом браузере. Не забывайте делать резервную копию.</footer>
 <div class="modal" id="modal" hidden><section class="dialog"><h2 id="modalTitle">Новая запись</h2><form id="form"><div class="form">
 <div class="field wide"><span>Имя</span><input name="name" maxlength="100" required></div>
@@ -59,7 +59,16 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 (()=>{
 const KEY='zhizhel-funeral-ledger-v1';
 const CURRENCIES=['Медная монета','Серебряная монета','Золотая монета','Электрумовая монета','Платиновая монета'];
-const currencyMap={'бронз.':'Медная монета','сереб.':'Серебряная монета','зол.':'Золотая монета','ММ':'Медная монета','СМ':'Серебряная монета','ЗМ':'Золотая монета','ЭМ':'Электрумовая монета','ПМ':'Платиновая монета'};
+const currencyMap={'бронз.':'Медная монета','Бронза':'Медная монета','Бронзовая монета':'Медная монета','сереб.':'Серебряная монета','Серебро':'Серебряная монета','зол.':'Золотая монета','Золото':'Золотая монета','ММ':'Медная монета','СМ':'Серебряная монета','ЗМ':'Золотая монета','ЭМ':'Электрумовая монета','ПМ':'Платиновая монета'};
+const COIN_VALUES={'Медная монета':1,'Серебряная монета':10,'Электрумовая монета':50,'Золотая монета':100,'Платиновая монета':1000};
+const COIN_PARTS=[
+ {value:100000,forms:['платиновая монета','платиновые монеты','платиновых монет','платиновой монеты']},
+ {value:10000,forms:['золотая монета','золотые монеты','золотых монет','золотой монеты']},
+ {value:5000,forms:['электрумовая монета','электрумовые монеты','электрумовых монет','электрумовой монеты']},
+ {value:1000,forms:['серебряная монета','серебряные монеты','серебряных монет','серебряной монеты']}
+];
+const COPPER_FORMS=['медная монета','медные монеты','медных монет','медной монеты'];
+const pluralRules=new Intl.PluralRules('ru-RU');
 let pages=[{entries:[]}],page=0,editing=null;
 const $=s=>document.querySelector(s),form=$('#form');
 
@@ -78,22 +87,52 @@ function load(){
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formatAmount(value){return Number((Number(value)||0).toFixed(2)).toLocaleString('ru-RU',{maximumFractionDigits:2})}
+function amountToSubCopper(amount,currency){
+ const normalized=currencyMap[currency]||currency;
+ const rate=COIN_VALUES[normalized]||0;
+ return Math.round((Number(amount)||0)*rate*100);
+}
+function coinNoun(amount,forms){
+ if(!Number.isInteger(amount))return forms[3];
+ const category=pluralRules.select(Math.abs(amount));
+ return category==='one'?forms[0]:category==='few'?forms[1]:forms[2];
+}
+function formatMoney(total){
+ let rest=Math.abs(Math.round(Number(total)||0));
+ const negative=Number(total)<0;
+ const parts=[];
+ for(const coin of COIN_PARTS){
+  const count=Math.floor(rest/coin.value);
+  if(count>0){parts.push(formatAmount(count)+' '+coinNoun(count,coin.forms));rest-=count*coin.value}
+ }
+ const copper=rest/100;
+ if(copper>0)parts.push(formatAmount(copper)+' '+coinNoun(copper,COPPER_FORMS));
+ if(!parts.length)parts.push('0 медных монет');
+ return (negative?'−':'')+parts.join(' · ');
+}
+function runningBalances(){
+ const balances=new Map();
+ let balance=0;
+ for(const p of pages){
+  for(const e of p.entries||[]){
+   balance+=amountToSubCopper(e.amount,e.currency)-amountToSubCopper(e.expense,e.expenseCurrency||e.currency);
+   balances.set(e.id,balance);
+  }
+ }
+ return balances;
+}
 function updateStats(){
  const all=pages.flatMap(p=>p.entries||[]);
- const earned=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
- const spent=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
+ const people=all.reduce((count,e)=>count+1+(Array.isArray(e.relatives)?e.relatives.filter(name=>String(name||'').trim()).length:0),0);
+ let earned=0,spent=0;
  all.forEach(e=>{
-  const c=currencyMap[e.currency]||e.currency;
-  const ec=currencyMap[e.expenseCurrency]||e.expenseCurrency||c;
-  if(Object.prototype.hasOwnProperty.call(earned,c))earned[c]+=Number(e.amount)||0;
-  if(Object.prototype.hasOwnProperty.call(spent,ec))spent[ec]+=Number(e.expense)||0;
+  earned+=amountToSubCopper(e.amount,e.currency);
+  spent+=amountToSubCopper(e.expense,e.expenseCurrency||e.currency);
  });
- const net=Object.fromEntries(CURRENCIES.map(c=>[c,earned[c]-spent[c]]));
- $('#peopleCount').textContent=String(all.length);
- const breakdown=totals=>CURRENCIES.map(c=>'<div class="stat-line"><span>'+c+'</span><strong>'+formatAmount(totals[c])+'</strong></div>').join('');
- $('#earnedTotal').innerHTML=breakdown(earned);
- $('#spentTotal').innerHTML=breakdown(spent);
- $('#netTotal').innerHTML=breakdown(net);
+ $('#peopleCount').textContent=String(people);
+ $('#earnedTotal').textContent=formatMoney(earned);
+ $('#spentTotal').textContent=formatMoney(spent);
+ $('#netTotal').textContent=formatMoney(earned-spent);
 }
 function relatives(){return [...$('#relatives').querySelectorAll('input')].map(x=>x.value.trim()).filter(Boolean)}
 function relInput(value=''){
@@ -103,6 +142,7 @@ function relInput(value=''){
 }
 function render(){
  const p=pages[page];
+ const balances=runningBalances();
  $('#pageLabel').textContent='Лист '+(page+1);
  $('#footPage').textContent=page+1;
  $('#total').textContent=pages.reduce((n,x)=>n+x.entries.length,0)+' записей';
@@ -112,7 +152,8 @@ function render(){
   const status={alive:'Жив',dead:'Мёртв',undead:'Нежить'}[e.status]||'Жив';
   const money=e.amount!==''&&e.amount!=null?esc(e.amount)+' '+esc(e.currency):'не указана';
   const expense=Number(e.expense)>0?'<div class="details"><strong>Траты помощнику:</strong> '+esc(e.expense)+' '+esc(e.expenseCurrency||e.currency)+'</div>':'';
-  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div>'+expense+'<div class="details"><strong>Родня:</strong> '+(e.relatives?.length?e.relatives.map(esc).join(' · '):'не указана')+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
+  const balance=formatMoney(balances.get(e.id)||0);
+  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Получено:</strong> '+money+'</div>'+expense+'<div class="details"><strong>Родня:</strong> '+(e.relatives?.length?e.relatives.map(esc).join(' · '):'не указана')+'</div><div class="details entry-balance"><strong>Остаток после записи:</strong> '+esc(balance)+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
  }).join('');
  $('#empty').hidden=p.entries.length>0;
  $('#entries').hidden=!p.entries.length;
