@@ -27,6 +27,8 @@ jobs:
         run: |
           mkdir dist
           cp index.html dist/index.html
+          base64 --decode apple-touch-icon.png.b64 > dist/apple-touch-icon.png
+          test -s dist/apple-touch-icon.png
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
