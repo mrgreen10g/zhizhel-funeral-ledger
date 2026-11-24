@@ -30,7 +30,7 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 <div class="field wide"><span>Имя</span><input name="name" maxlength="100" required></div>
 <div class="field"><span>Возраст</span><input name="age" type="number" min="0" max="999"></div>
 <div class="field"><span>Состояние</span><select name="status"><option value="alive">Жив</option><option value="dead">Мёртв</option><option value="undead">Нежить</option></select></div>
-<div class="field wide"><span>Оплата</span><div class="money"><input name="amount" type="number" min="0" step=".01" placeholder="Сумма"><select name="currency"><option value="бронз.">Бронза</option><option value="сереб.">Серебро</option><option value="зол.">Золото</option></select></div></div>
+<div class="field wide"><span>Оплата</span><div class="money"><input name="amount" type="number" min="0" step=".01" placeholder="Сумма"><select name="currency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div></div>
 <div class="field wide"><span>Родня <button type="button" id="addRelative" class="rel-remove">＋ добавить</button></span><div id="relatives"></div></div>
 <div class="field wide"><span>Дополнительные заметки / компромат</span><textarea name="comment" maxlength="1200"></textarea></div></div><div class="modal-actions"><button type="button" class="btn secondary" id="cancel">Отмена</button><button class="btn" type="submit">Сохранить в книгу</button></div></form></section></div>
 <script>
@@ -38,7 +38,7 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 const KEY='zhizhel-funeral-ledger-v1';let pages=[{entries:[]}],page=0,editing=null;
 const $=s=>document.querySelector(s),form=$('#form');
 function save(){localStorage.setItem(KEY,JSON.stringify({pages,page}))}
-function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.pages)&&x.pages.length){pages=x.pages;page=Math.min(x.page||0,pages.length-1)}}catch(e){}}
+const currencyMap={'бронз.':'Медная монета','сереб.':'Серебряная монета','зол.':'Золотая монета','ММ':'Медная монета','СМ':'Серебряная монета','ЗМ':'Золотая монета','ЭМ':'Электрумовая монета','ПМ':'Платиновая монета'};function normalizePages(list){return list.map(p=>({...p,entries:(p.entries||[]).map(e=>({...e,currency:currencyMap[e.currency]||e.currency||'Золотая монета'}))}))}function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.pages)&&x.pages.length){pages=normalizePages(x.pages);page=Math.min(x.page||0,pages.length-1)}}catch(e){}}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function relatives(){return [...$('#relatives').querySelectorAll('input')].map(x=>x.value.trim()).filter(Boolean)}
 function relInput(value=''){const d=document.createElement('div');d.className='relrow';d.innerHTML='<input maxlength="120" placeholder="Имя — степень родства"><button type="button" class="rel-remove" aria-label="Удалить родственника">×</button>';d.querySelector('input').value=value;d.querySelector('button').onclick=()=>d.remove();$('#relatives').append(d)}
@@ -50,7 +50,7 @@ form.onsubmit=e=>{e.preventDefault();const data={id:editing||crypto.randomUUID()
 $('#entries').onclick=e=>{const id=e.target.dataset.edit||e.target.dataset.del;if(!id)return;for(const p of pages){const i=p.entries.findIndex(x=>x.id===id);if(i<0)continue;if(e.target.dataset.edit)open(p.entries[i]);else if(confirm('Удалить эту запись?'))p.entries.splice(i,1);render();break}};
 $('#prev').onclick=()=>{if(page>0){page--;render()}};$('#next').onclick=()=>{if(page===pages.length-1)pages.push({entries:[]});page++;render()};
 $('#export').onclick=()=>{const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',pages,page},null,2)],{type:'application/json'}));a.href=u;a.download='zhizhel-ledger-backup.json';a.click();URL.revokeObjectURL(u)};
-$('#import').onclick=()=>$('#file').click();$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.app!=='zhizhel-funeral-ledger'||!Array.isArray(x.pages))throw Error();if(confirm('Заменить текущую книгу данными из файла?')){pages=x.pages.length?x.pages:[{entries:[]}];page=Math.min(x.page||0,pages.length-1);render()}}catch(e){alert('Не удалось прочитать резервную копию')}e.target.value=''};
+$('#import').onclick=()=>$('#file').click();$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.app!=='zhizhel-funeral-ledger'||!Array.isArray(x.pages))throw Error();if(confirm('Заменить текущую книгу данными из файла?')){pages=x.pages.length?normalizePages(x.pages):[{entries:[]}];page=Math.min(x.page||0,pages.length-1);render()}}catch(e){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});load();render();
 })();
 </script></body></html>
