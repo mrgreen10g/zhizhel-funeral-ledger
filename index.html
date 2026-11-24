@@ -21,6 +21,16 @@ main{max-width:1050px;margin:30px auto;padding:0 20px}.intro{text-align:center;c
 .page-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:22px;color:#92764e;font:italic 13px var(--display)}.pagination{display:flex;justify-content:center;align-items:center;gap:24px;margin:18px auto 0}.arrow{width:42px;height:42px;border-radius:50%;border:1px solid #c19a5877;background:#281810;color:#e2c48a;font-size:24px}.counter{text-align:center;color:#e2c48a;font:16px var(--display)}.counter small{display:block;color:#a98e70;font-size:12px}
 footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 .modal[hidden]{display:none}.modal{position:fixed;inset:0;background:#080503cc;display:grid;place-items:center;padding:18px;z-index:4}.dialog{width:min(620px,100%);max-height:90vh;overflow:auto;background:#e9d7b2;color:#352419;padding:25px;border:5px double #9a7544;box-shadow:0 20px 60px #000b}.dialog h2{font:600 28px var(--display);margin:0 0 18px}.form{display:grid;grid-template-columns:1fr 1fr;gap:13px}.field{display:grid;gap:5px}.wide{grid-column:1/-1}.field label,.field>span{font:600 14px var(--display);color:#745330}.field input,.field select,.field textarea{width:100%;border:1px solid #ad936c;background:#f8edcf;color:#382719;border-radius:2px;padding:10px;font:16px system-ui}.field textarea{min-height:85px;resize:vertical}.money{display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,1fr);gap:8px}.relrow{display:flex;gap:7px;margin-bottom:7px}.relrow input{flex:1}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+
+.ledger-stats{max-width:1050px;margin:22px auto 0;padding:0 20px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.stat-card{min-width:0;padding:13px 15px;border:1px solid #c19a5866;border-radius:5px;background:linear-gradient(145deg,#3a2419dd,#1c110ddd);box-shadow:inset 0 0 18px #c19a580c}
+.stat-label{display:block;margin-bottom:8px;color:#c5a77a;font:600 12px var(--display);letter-spacing:.12em;text-transform:uppercase}
+.stat-number{display:block;color:#f0dfbd;font:600 32px/1 var(--display);font-variant-numeric:tabular-nums}
+.stat-values{display:grid;gap:4px}
+.stat-line{display:flex;justify-content:space-between;gap:8px;color:#c7ad88;font:12px/1.25 var(--display)}
+.stat-line strong{color:#f0dfbd;font:600 13px var(--display);white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-width:760px){.ledger-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat-card{padding:11px 12px}.stat-line{font-size:11px}.stat-line strong{font-size:12px}}
+
 @media(max-width:620px){header{align-items:flex-start;flex-direction:column}.head-actions{width:100%}.head-actions .btn{flex:1}.book{padding:10px 8px 10px 15px}.page{min-height:530px;padding:22px 18px}.entry-name{font-size:23px}.form{grid-template-columns:1fr}.money{grid-template-columns:1fr}.wide{grid-column:auto}}
 </style><link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="180x180" href="./apple-touch-icon.png?v=2">
@@ -30,32 +40,145 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 </head>
 <body>
 <header><div><p class="eyebrow">Личный реестр скорби</p><h1>Похоронная книга Жижеля</h1><p class="subtitle">Память — товар, а горе — ремесло.</p></div><div class="head-actions"><button class="btn" id="add">＋ Записать имя</button><button class="btn secondary" id="export">Экспорт</button><button class="btn secondary" id="import">Импорт</button><input id="file" type="file" accept=".json,application/json" hidden></div></header>
+<section class="ledger-stats" aria-label="Финансовая сводка">
+  <article class="stat-card"><span class="stat-label">Людей в книге</span><strong class="stat-number" id="peopleCount">0</strong></article>
+  <article class="stat-card"><span class="stat-label">Заработано</span><div class="stat-values" id="earnedTotal"></div></article>
+  <article class="stat-card"><span class="stat-label">Отдано помощнику</span><div class="stat-values" id="spentTotal"></div></article>
+  <article class="stat-card"><span class="stat-label">Остаток после трат</span><div class="stat-values" id="netTotal"></div></article>
+</section>
 <main><p class="intro">✦ Имена, которые ещё можно оплакать ✦</p><section class="book"><div class="page"><div class="page-top"><span id="pageLabel">Лист I</span><span id="total">0 записей</span></div><div class="page-title"><span class="orn">❧</span><h2>Реестр скорбящих</h2><p>Каждое имя заслуживает последнего свидетеля</p></div><div id="entries" class="entries"></div><div id="empty" class="empty"><div class="symbol">❦</div><h3>На этом листе пока тишина</h3><p>Оставьте здесь первое имя.</p></div><div class="page-foot"><span>Архив Жижеля</span><span id="footPage">I</span></div></div></section><nav class="pagination"><button class="arrow" id="prev" aria-label="Предыдущая страница">‹</button><div class="counter"><span id="counter">Страница 1 из 1</span><small>Листайте книгу</small></div><button class="arrow" id="next" aria-label="Следующая страница">›</button></nav></main><footer>Записи хранятся в этом браузере. Не забывайте делать резервную копию.</footer>
 <div class="modal" id="modal" hidden><section class="dialog"><h2 id="modalTitle">Новая запись</h2><form id="form"><div class="form">
 <div class="field wide"><span>Имя</span><input name="name" maxlength="100" required></div>
 <div class="field"><span>Возраст</span><input name="age" type="number" min="0" max="999"></div>
 <div class="field"><span>Состояние</span><select name="status"><option value="alive">Жив</option><option value="dead">Мёртв</option><option value="undead">Нежить</option></select></div>
 <div class="field wide"><span>Оплата</span><div class="money"><input name="amount" type="number" min="0" step=".01" placeholder="Сумма"><select name="currency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div></div>
+<div class="field wide"><span>Траты / выплата помощнику</span><div class="money"><input name="expense" type="number" min="0" step=".01" placeholder="Сумма трат"><select name="expenseCurrency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div></div>
 <div class="field wide"><span>Родня <button type="button" id="addRelative" class="rel-remove">＋ добавить</button></span><div id="relatives"></div></div>
 <div class="field wide"><span>Дополнительные заметки / компромат</span><textarea name="comment" maxlength="1200"></textarea></div></div><div class="modal-actions"><button type="button" class="btn secondary" id="cancel">Отмена</button><button class="btn" type="submit">Сохранить в книгу</button></div></form></section></div>
 <script>
 (()=>{
-const KEY='zhizhel-funeral-ledger-v1';let pages=[{entries:[]}],page=0,editing=null;
+const KEY='zhizhel-funeral-ledger-v1';
+const CURRENCIES=['Медная монета','Серебряная монета','Золотая монета','Электрумовая монета','Платиновая монета'];
+const currencyMap={'бронз.':'Медная монета','сереб.':'Серебряная монета','зол.':'Золотая монета','ММ':'Медная монета','СМ':'Серебряная монета','ЗМ':'Золотая монета','ЭМ':'Электрумовая монета','ПМ':'Платиновая монета'};
+let pages=[{entries:[]}],page=0,editing=null;
 const $=s=>document.querySelector(s),form=$('#form');
+
 function save(){localStorage.setItem(KEY,JSON.stringify({pages,page}))}
-const currencyMap={'бронз.':'Медная монета','сереб.':'Серебряная монета','зол.':'Золотая монета','ММ':'Медная монета','СМ':'Серебряная монета','ЗМ':'Золотая монета','ЭМ':'Электрумовая монета','ПМ':'Платиновая монета'};function normalizePages(list){return list.map(p=>({...p,entries:(p.entries||[]).map(e=>({...e,currency:currencyMap[e.currency]||e.currency||'Золотая монета'}))}))}function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(x&&Array.isArray(x.pages)&&x.pages.length){pages=normalizePages(x.pages);page=Math.min(x.page||0,pages.length-1)}}catch(e){}}
+function normalizePages(list){
+ return list.map(p=>({...p,entries:(p.entries||[]).map(e=>{
+  const currency=currencyMap[e.currency]||e.currency||'Золотая монета';
+  return {...e,currency,expense:e.expense??'',expenseCurrency:currencyMap[e.expenseCurrency]||e.expenseCurrency||currency};
+ })}));
+}
+function load(){
+ try{
+  const x=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(x&&Array.isArray(x.pages)&&x.pages.length){pages=normalizePages(x.pages);page=Math.min(x.page||0,pages.length-1)}
+ }catch(e){}
+}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function formatAmount(value){return Number((Number(value)||0).toFixed(2)).toLocaleString('ru-RU',{maximumFractionDigits:2})}
+function updateStats(){
+ const all=pages.flatMap(p=>p.entries||[]);
+ const earned=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
+ const spent=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
+ all.forEach(e=>{
+  const c=currencyMap[e.currency]||e.currency;
+  const ec=currencyMap[e.expenseCurrency]||e.expenseCurrency||c;
+  if(Object.prototype.hasOwnProperty.call(earned,c))earned[c]+=Number(e.amount)||0;
+  if(Object.prototype.hasOwnProperty.call(spent,ec))spent[ec]+=Number(e.expense)||0;
+ });
+ const net=Object.fromEntries(CURRENCIES.map(c=>[c,earned[c]-spent[c]]));
+ $('#peopleCount').textContent=String(all.length);
+ const breakdown=totals=>CURRENCIES.map(c=>'<div class="stat-line"><span>'+c+'</span><strong>'+formatAmount(totals[c])+'</strong></div>').join('');
+ $('#earnedTotal').innerHTML=breakdown(earned);
+ $('#spentTotal').innerHTML=breakdown(spent);
+ $('#netTotal').innerHTML=breakdown(net);
+}
 function relatives(){return [...$('#relatives').querySelectorAll('input')].map(x=>x.value.trim()).filter(Boolean)}
-function relInput(value=''){const d=document.createElement('div');d.className='relrow';d.innerHTML='<input maxlength="120" placeholder="Имя — степень родства"><button type="button" class="rel-remove" aria-label="Удалить родственника">×</button>';d.querySelector('input').value=value;d.querySelector('button').onclick=()=>d.remove();$('#relatives').append(d)}
-function render(){const p=pages[page];$('#pageLabel').textContent='Лист '+(page+1);$('#footPage').textContent=page+1;$('#total').textContent=pages.reduce((n,x)=>n+x.entries.length,0)+' записей';$('#counter').textContent='Страница '+(page+1)+' из '+pages.length;$('#prev').disabled=page===0;$('#entries').innerHTML=p.entries.map(e=>{const status={alive:'Жив',dead:'Мёртв',undead:'Нежить'}[e.status]||'Жив';const money=e.amount!==''&&e.amount!=null?esc(e.amount)+' '+esc(e.currency):'не указана';return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div><div class="details"><strong>Родня:</strong> '+(e.relatives?.length?e.relatives.map(esc).join(' · '):'не указана')+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>'}).join('');$('#empty').hidden=p.entries.length>0;$('#entries').hidden=!p.entries.length;$('#prev').disabled=page===0;save()}
-function open(e){editing=e?.id||null;form.reset();$('#relatives').replaceChildren();$('#modalTitle').textContent=e?'Исправить запись':'Новая запись';if(e){form.elements.name.value=e.name;form.elements.age.value=e.age;form.elements.status.value=e.status;form.elements.amount.value=e.amount??'';form.elements.currency.value=e.currency;form.elements.comment.value=e.comment;(e.relatives||[]).forEach(relInput)}if(!e||!e.relatives?.length)relInput();$('#modal').hidden=false;form.elements.name.focus()}
+function relInput(value=''){
+ const d=document.createElement('div');d.className='relrow';
+ d.innerHTML='<input maxlength="120" placeholder="Имя — степень родства"><button type="button" class="rel-remove" aria-label="Удалить родственника">×</button>';
+ d.querySelector('input').value=value;d.querySelector('button').onclick=()=>d.remove();$('#relatives').append(d);
+}
+function render(){
+ const p=pages[page];
+ $('#pageLabel').textContent='Лист '+(page+1);
+ $('#footPage').textContent=page+1;
+ $('#total').textContent=pages.reduce((n,x)=>n+x.entries.length,0)+' записей';
+ $('#counter').textContent='Страница '+(page+1)+' из '+pages.length;
+ $('#prev').disabled=page===0;
+ $('#entries').innerHTML=p.entries.map(e=>{
+  const status={alive:'Жив',dead:'Мёртв',undead:'Нежить'}[e.status]||'Жив';
+  const money=e.amount!==''&&e.amount!=null?esc(e.amount)+' '+esc(e.currency):'не указана';
+  const expense=Number(e.expense)>0?'<div class="details"><strong>Траты помощнику:</strong> '+esc(e.expense)+' '+esc(e.expenseCurrency||e.currency)+'</div>':'';
+  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div>'+expense+'<div class="details"><strong>Родня:</strong> '+(e.relatives?.length?e.relatives.map(esc).join(' · '):'не указана')+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
+ }).join('');
+ $('#empty').hidden=p.entries.length>0;
+ $('#entries').hidden=!p.entries.length;
+ $('#prev').disabled=page===0;
+ updateStats();
+ save();
+}
+function open(e){
+ editing=e?.id||null;form.reset();$('#relatives').replaceChildren();
+ $('#modalTitle').textContent=e?'Исправить запись':'Новая запись';
+ if(e){
+  form.elements.name.value=e.name;form.elements.age.value=e.age;form.elements.status.value=e.status;
+  form.elements.amount.value=e.amount??'';form.elements.currency.value=e.currency;
+  form.elements.expense.value=e.expense??'';form.elements.expenseCurrency.value=e.expenseCurrency||e.currency;
+  form.elements.comment.value=e.comment;(e.relatives||[]).forEach(relInput);
+ }else{
+  form.elements.currency.value='Золотая монета';
+  form.elements.expenseCurrency.value='Золотая монета';
+ }
+ if(!e||!e.relatives?.length)relInput();
+ $('#modal').hidden=false;form.elements.name.focus();
+}
 function close(){$('#modal').hidden=true;editing=null}
-$('#add').onclick=()=>open();$('#cancel').onclick=close;$('#addRelative').onclick=()=>relInput();$('#modal').addEventListener('click',e=>{if(e.target===$('#modal'))close()});
-form.onsubmit=e=>{e.preventDefault();const data={id:editing||crypto.randomUUID(),name:form.elements.name.value.trim(),age:form.elements.age.value,status:form.elements.status.value,amount:form.elements.amount.value,currency:form.elements.currency.value,relatives:relatives(),comment:form.elements.comment.value.trim()};if(!data.name)return;const list=pages[page].entries;if(editing){for(const p of pages){const i=p.entries.findIndex(x=>x.id===editing);if(i>=0){p.entries[i]=data;break}}}else list.push(data);close();render()};
-$('#entries').onclick=e=>{const id=e.target.dataset.edit||e.target.dataset.del;if(!id)return;for(const p of pages){const i=p.entries.findIndex(x=>x.id===id);if(i<0)continue;if(e.target.dataset.edit)open(p.entries[i]);else if(confirm('Удалить эту запись?'))p.entries.splice(i,1);render();break}};
-$('#prev').onclick=()=>{if(page>0){page--;render()}};$('#next').onclick=()=>{if(page===pages.length-1)pages.push({entries:[]});page++;render()};
-$('#export').onclick=()=>{const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',pages,page},null,2)],{type:'application/json'}));a.href=u;a.download='zhizhel-ledger-backup.json';a.click();URL.revokeObjectURL(u)};
-$('#import').onclick=()=>$('#file').click();$('#file').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const x=JSON.parse(await f.text());if(x.app!=='zhizhel-funeral-ledger'||!Array.isArray(x.pages))throw Error();if(confirm('Заменить текущую книгу данными из файла?')){pages=x.pages.length?normalizePages(x.pages):[{entries:[]}];page=Math.min(x.page||0,pages.length-1);render()}}catch(e){alert('Не удалось прочитать резервную копию')}e.target.value=''};
-document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});load();render();
+$('#add').onclick=()=>open();
+$('#cancel').onclick=close;
+$('#addRelative').onclick=()=>relInput();
+$('#modal').addEventListener('click',e=>{if(e.target===$('#modal'))close()});
+form.onsubmit=e=>{
+ e.preventDefault();
+ const data={
+  id:editing||crypto.randomUUID(),name:form.elements.name.value.trim(),age:form.elements.age.value,
+  status:form.elements.status.value,amount:form.elements.amount.value,currency:form.elements.currency.value,
+  expense:form.elements.expense.value,expenseCurrency:form.elements.expenseCurrency.value,
+  relatives:relatives(),comment:form.elements.comment.value.trim()
+ };
+ if(!data.name)return;
+ if(editing){
+  for(const p of pages){const i=p.entries.findIndex(x=>x.id===editing);if(i>=0){p.entries[i]=data;break}}
+ }else pages[page].entries.push(data);
+ close();render();
+};
+$('#entries').onclick=e=>{
+ const id=e.target.dataset.edit||e.target.dataset.del;if(!id)return;
+ for(const p of pages){
+  const i=p.entries.findIndex(x=>x.id===id);if(i<0)continue;
+  if(e.target.dataset.edit)open(p.entries[i]);
+  else if(confirm('Удалить эту запись?'))p.entries.splice(i,1);
+  render();break;
+ }
+};
+$('#prev').onclick=()=>{if(page>0){page--;render()}};
+$('#next').onclick=()=>{if(page===pages.length-1)pages.push({entries:[]});page++;render()};
+$('#export').onclick=()=>{
+ const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',pages,page},null,2)],{type:'application/json'}));
+ a.href=u;a.download='zhizhel-ledger-backup.json';a.click();URL.revokeObjectURL(u);
+};
+$('#import').onclick=()=>$('#file').click();
+$('#file').onchange=async e=>{
+ const f=e.target.files[0];if(!f)return;
+ try{
+  const x=JSON.parse(await f.text());if(x.app!=='zhizhel-funeral-ledger'||!Array.isArray(x.pages))throw Error();
+  if(confirm('Заменить текущую книгу данными из файла?')){pages=x.pages.length?normalizePages(x.pages):[{entries:[]}];page=Math.min(x.page||0,pages.length-1);render()}
+ }catch(e){alert('Не удалось прочитать резервную копию')}
+ e.target.value='';
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+load();render();
 })();
 </script></body></html>
