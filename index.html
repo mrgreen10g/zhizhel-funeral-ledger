@@ -31,6 +31,84 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 @media(max-width:760px){.ledger-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.stat-card{padding:11px 12px}.stat-line{font-size:11px}.stat-line strong{font-size:12px}}
 
 @media(max-width:620px){header{align-items:flex-start;flex-direction:column}.head-actions{width:100%}.head-actions .btn{flex:1}.book{padding:10px 8px 10px 15px}.page{min-height:530px;padding:22px 18px}.entry-name{font-size:23px}.form{grid-template-columns:1fr}.money{grid-template-columns:1fr}.wide{grid-column:auto}}
+
+/* Updated book controls and statistics */
+.page{position:relative;overflow:hidden}
+.ledger-stats{display:none!important}
+.summary-bar{max-width:1050px;margin:22px auto 0;padding:0 20px}
+.summary-facts{display:flex;align-items:center;justify-content:center;gap:clamp(16px,4vw,42px);padding:14px 18px 17px;border:1px solid #c19a5877;border-radius:5px;background:linear-gradient(145deg,#3a2419dd,#1c110ddd);box-shadow:inset 0 0 18px #c19a5810}
+.summary-fact{display:grid;gap:5px;text-align:center;min-width:0}
+.summary-fact span{color:#c5a77a;font:600 12px var(--display);letter-spacing:.13em;text-transform:uppercase}
+.summary-fact strong{color:#f4e5c7;font:600 clamp(23px,3.4vw,34px)/1.1 var(--display);overflow-wrap:anywhere}
+.summary-divider{height:42px;width:1px;background:#c19a5866}
+.stats-toggle{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px auto 0;padding:8px 15px;border:1px solid #c19a5866;border-radius:3px;background:#291810;color:#e1c28a;font:600 14px var(--display)}
+.stats-toggle:hover,.tool-button:hover{background:#3c2619}
+.stats-panel{max-width:1010px;margin:10px auto 0;padding:18px 20px;border:1px solid #c19a5866;border-radius:5px;background:linear-gradient(145deg,#332015f2,#1b110df2);box-shadow:0 10px 30px #0004}
+.stats-panel[hidden],.ink-toolbar[hidden]{display:none!important}
+.stats-panel-title h2{margin:0;color:#f0dfbd;font:600 24px var(--display)}
+.stats-panel-title p,.dialog-note{margin:3px 0 13px;color:#b69a72;font:italic 14px var(--display)}
+.coin-table{display:grid;gap:0}
+.coin-row{display:grid;grid-template-columns:minmax(150px,1.4fr) 1fr 1fr;gap:12px;padding:8px 4px;border-bottom:1px solid #c19a5826;color:#d8c29e;font:14px var(--display)}
+.coin-row span:not(:first-child),.coin-row strong{text-align:right;font-variant-numeric:tabular-nums}
+.coin-head{color:#b99a69;font:600 11px var(--display);letter-spacing:.12em;text-transform:uppercase}
+.stats-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.stats-total{display:grid;gap:6px;min-width:0;padding:11px;border:1px solid #c19a5838;border-radius:4px;background:#120b0866;text-align:left}
+.stats-total span{color:#b99a69;font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase}
+.stats-total strong{color:#f0dfbd;font:600 18px/1.3 var(--display);overflow-wrap:anywhere}
+button.stats-total{width:100%;cursor:pointer}
+button.stats-total:hover{border-color:#d7b97e;background:#3a2419}
+.head-actions{align-items:center}
+.more-tools{position:relative}
+.more-tools summary{list-style:none;cursor:pointer;padding:10px 12px;border:1px solid #c19a5866;border-radius:3px;color:#d8bd8d;font:600 13px var(--display)}
+.more-tools summary::-webkit-details-marker{display:none}
+.more-menu{position:absolute;right:0;top:calc(100% + 7px);z-index:10;display:grid;gap:6px;min-width:160px;padding:9px;border:1px solid #c19a5877;border-radius:4px;background:#24160f;box-shadow:0 12px 25px #0009}
+.more-menu .btn{width:100%}
+.ink-toolbar{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;max-width:900px;margin:0 auto 14px;padding:12px;border:1px solid #c19a5877;border-radius:5px;background:linear-gradient(145deg,#392419,#1d120d);color:#e5d1ac}
+.ink-modes{display:flex;gap:5px}
+.ink-modes button,.tool-button{padding:8px 11px;border:1px solid #c19a5877;border-radius:3px;background:#21140f;color:#e2c48a;font:600 13px var(--display)}
+.ink-modes button.tool-active{background:#c19a58;color:#24160f;border-color:#e2c48a}
+.pen-size{display:flex;align-items:center;gap:8px;color:#d6bd91;font:13px var(--display)}
+.pen-size input{width:105px;accent-color:#c19a58}
+.pen-size output{min-width:30px;color:#f0dfbd}
+.tool-button:disabled{opacity:.4;cursor:not-allowed}
+.tool-button.done{background:#c19a58;color:#24160f}
+.ink-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:8;pointer-events:none}
+.ink-canvas.active{pointer-events:auto;touch-action:none;cursor:crosshair}
+.ink-canvas.active.select-mode{cursor:grab}
+.ink-canvas.active.dragging{cursor:grabbing}
+.entry-balance{margin-top:5px;color:#78552e;font-size:17px}
+.entry-balance strong{font-size:13px}
+.dialog-note{color:#806344}
+.expense-history-title{margin:18px 0 8px;padding-top:12px;border-top:1px solid #a88b5f66;color:#745330;font:600 17px var(--display)}
+.expense-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #ad936c55;color:#382719}
+.expense-row-main{display:grid;gap:3px;min-width:0}
+.expense-row-main strong{font:600 17px var(--display);overflow-wrap:anywhere}
+.expense-row-main small{color:#806344;font:italic 13px var(--display);overflow-wrap:anywhere}
+.expense-row-actions{display:flex;gap:8px;flex-shrink:0}
+.expense-row-actions button{border:0;background:none;color:#76552e;text-decoration:underline;font-size:12px;padding:4px}
+.expense-empty{padding:12px 0;color:#806344;font:italic 15px var(--display)}
+@media(max-width:760px){
+ .summary-bar{margin-top:15px;padding:0 12px}
+ .summary-facts{gap:12px;padding:12px 8px}
+ .summary-fact span{font-size:10px;letter-spacing:.07em}
+ .summary-fact strong{font-size:clamp(19px,5vw,26px)}
+ .stats-panel{margin:9px 12px 0;padding:13px}
+ .stats-totals{grid-template-columns:1fr}
+ .coin-row{grid-template-columns:minmax(115px,1.3fr) .8fr .8fr;gap:7px;font-size:12px}
+ .coin-head{font-size:9px}
+ .ink-toolbar{margin:0 0 12px;padding:9px;gap:8px}
+ .pen-size{width:100%;justify-content:center}
+ .pen-size input{flex:1;max-width:180px}
+ .more-menu{right:0}
+}
+@media(max-width:620px){
+ .head-actions{display:flex;align-items:stretch;gap:6px}
+ .head-actions>.btn{flex:1;min-width:0;padding:10px 8px;font-size:13px}
+ .more-tools summary{height:100%;display:flex;align-items:center;padding:8px;font-size:11px}
+ .expense-row{align-items:flex-start}
+ .expense-row-actions{gap:4px}
+}
+
 </style><link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,23 +116,74 @@ footer{text-align:center;color:#a98e70;font-size:11px;margin:25px}
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 <body>
-<header><div><p class="eyebrow">Личный реестр скорби</p><h1>Похоронная книга Жижеля</h1><p class="subtitle">Память — товар, а горе — ремесло.</p></div><div class="head-actions"><button class="btn" id="add">＋ Записать имя</button><button class="btn secondary" id="export">Экспорт</button><button class="btn secondary" id="import">Импорт</button><input id="file" type="file" accept=".json,application/json" hidden></div></header>
-<section class="ledger-stats" aria-label="Финансовая сводка">
-  <article class="stat-card"><span class="stat-label">Людей в книге</span><strong class="stat-number" id="peopleCount">0</strong></article>
-  <article class="stat-card"><span class="stat-label">Всего получено</span><strong class="stat-money" id="earnedTotal">0 медных монет</strong></article>
-  <article class="stat-card"><span class="stat-label">Отдано помощнику</span><strong class="stat-money" id="spentTotal">0 медных монет</strong></article>
-  <article class="stat-card"><span class="stat-label">Чистый остаток</span><strong class="stat-money" id="netTotal">0 медных монет</strong></article>
+<header>
+  <div><p class="eyebrow">Личный реестр скорби</p><h1>Похоронная книга Жижеля</h1><p class="subtitle">Память — товар, а горе — ремесло.</p></div>
+  <div class="head-actions">
+    <button class="btn" id="add">＋ Записать имя</button>
+    <button class="btn" id="inkToggle" aria-pressed="false">✒ Роспись</button>
+    <details class="more-tools"><summary>Резервная копия</summary><div class="more-menu"><button class="btn secondary" id="export" type="button">Экспорт JSON</button><button class="btn secondary" id="import" type="button">Импорт JSON</button></div></details>
+    <input id="file" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+<section class="summary-bar" aria-label="Краткая статистика">
+  <div class="summary-facts">
+    <div class="summary-fact"><span>В книге записано</span><strong id="peopleSummary">0 человек</strong></div>
+    <div class="summary-divider"></div>
+    <div class="summary-fact"><span>Заработано</span><strong id="earnedSummary">0 медных монет</strong></div>
+  </div>
+  <button class="stats-toggle" id="toggleStats" type="button" aria-expanded="false">Монетная ведомость <span id="statsChevron">⌄</span></button>
+</section>
+<section class="stats-panel" id="statsPanel" hidden>
+  <div class="stats-panel-title"><div><h2>Монетная ведомость</h2><p>Сводка по всем страницам книги</p></div></div>
+  <div class="coin-table">
+    <div class="coin-row coin-head"><span>Номинал</span><span>Получено</span><span>Отдано</span></div>
+    <div id="coinRows"></div>
+  </div>
+  <div class="stats-totals">
+    <div class="stats-total"><span>Получено всего</span><strong id="earnedTotal">0</strong></div>
+    <button class="stats-total expense-total" id="manageExpenses" type="button"><span>Отдано помощнику · нажмите, чтобы добавить или изменить выплату</span><strong id="spentTotal">0</strong></button>
+    <div class="stats-total"><span>Чистый остаток</span><strong id="netTotal">0</strong></div>
+  </div>
 </section>
 <p class="stats-note">Все суммы сведены по курсу D&amp;D: 10 медных = 1 серебряная, 2 электрумовые = 1 золотая, 10 золотых = 1 платиновая.</p>
-<main><p class="intro">✦ Имена, которые ещё можно оплакать ✦</p><section class="book"><div class="page"><div class="page-top"><span id="pageLabel">Лист I</span><span id="total">0 записей</span></div><div class="page-title"><span class="orn">❧</span><h2>Реестр скорбящих</h2><p>Каждое имя заслуживает последнего свидетеля</p></div><div id="entries" class="entries"></div><div id="empty" class="empty"><div class="symbol">❦</div><h3>На этом листе пока тишина</h3><p>Оставьте здесь первое имя.</p></div><div class="page-foot"><span>Архив Жижеля</span><span id="footPage">I</span></div></div></section><nav class="pagination"><button class="arrow" id="prev" aria-label="Предыдущая страница">‹</button><div class="counter"><span id="counter">Страница 1 из 1</span><small>Листайте книгу</small></div><button class="arrow" id="next" aria-label="Следующая страница">›</button></nav></main><footer>Записи хранятся в этом браузере. Не забывайте делать резервную копию.</footer>
+<main>
+  <p class="intro">✦ Имена, которые ещё можно оплакать ✦</p>
+  <section class="ink-toolbar" id="inkToolbar" hidden>
+    <div class="ink-modes"><button type="button" data-ink-mode="draw" class="tool-active">Перо</button><button type="button" data-ink-mode="select">Переместить</button></div>
+    <label class="pen-size">Толщина пера <input id="penWidth" type="range" min="1" max="12" value="3"><output id="penWidthValue">3 px</output></label>
+    <button class="tool-button" id="deleteStroke" type="button" disabled>Удалить выбранный штрих</button>
+    <button class="tool-button" id="clearDrawings" type="button">Очистить страницу</button>
+    <button class="tool-button done" id="closeInk" type="button">Готово</button>
+  </section>
+  <section class="book"><div class="page">
+    <div class="page-top"><span id="pageLabel">Лист I</span><span id="total">0 записей</span></div>
+    <div class="page-title"><span class="orn">❧</span><h2>Реестр скорбящих</h2><p>Каждое имя заслуживает последнего свидетеля</p></div>
+    <div id="entries" class="entries"></div>
+    <div id="empty" class="empty"><div class="symbol">❦</div><h3>На этом листе пока тишина</h3><p>Оставьте здесь первое имя.</p></div>
+    <div class="page-foot"><span>Архив Жижеля</span><span id="footPage">1</span></div>
+    <canvas class="ink-canvas" id="inkCanvas" aria-label="Поле для росписи"></canvas>
+  </div></section>
+  <nav class="pagination"><button class="arrow" id="prev" aria-label="Предыдущая страница">‹</button><div class="counter"><span id="counter">Страница 1 из 1</span><small>Листайте книгу</small></div><button class="arrow" id="next" aria-label="Следующая страница">›</button></nav>
+</main><footer>Записи хранятся в этом браузере. Не забывайте делать резервную копию.</footer>
 <div class="modal" id="modal" hidden><section class="dialog"><h2 id="modalTitle">Новая запись</h2><form id="form"><div class="form">
-<div class="field wide"><span>Имя</span><input name="name" maxlength="100" required></div>
-<div class="field"><span>Возраст</span><input name="age" type="number" min="0" max="999"></div>
-<div class="field"><span>Состояние</span><select name="status"><option value="alive">Жив</option><option value="dead">Мёртв</option><option value="undead">Нежить</option></select></div>
-<div class="field wide"><span>Оплата</span><div class="money"><input name="amount" type="number" min="0" step=".01" placeholder="Сумма"><select name="currency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div></div>
-<div class="field wide"><span>Траты / выплата помощнику</span><div class="money"><input name="expense" type="number" min="0" step=".01" placeholder="Сумма трат"><select name="expenseCurrency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div></div>
-<div class="field wide"><span>Родня <button type="button" id="addRelative" class="rel-remove">＋ добавить</button></span><div id="relatives"></div></div>
-<div class="field wide"><span>Дополнительные заметки / компромат</span><textarea name="comment" maxlength="1200"></textarea></div></div><div class="modal-actions"><button type="button" class="btn secondary" id="cancel">Отмена</button><button class="btn" type="submit">Сохранить в книгу</button></div></form></section></div>
+  <div class="field wide"><span>Имя</span><input name="name" maxlength="100" required></div>
+  <div class="field"><span>Возраст</span><input name="age" type="number" min="0" max="999"></div>
+  <div class="field"><span>Состояние</span><select name="status"><option value="alive">Жив</option><option value="dead">Мёртв</option><option value="undead">Нежить</option></select></div>
+  <div class="field wide"><span>Оплата</span><div class="money"><input name="amount" type="number" min="0" step=".01" placeholder="Сумма"><select name="currency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div></div>
+  <div class="field wide"><span>Родня <button type="button" id="addRelative" class="rel-remove">＋ добавить</button></span><div id="relatives"></div></div>
+  <div class="field wide"><span>Дополнительные заметки / компромат</span><textarea name="comment" maxlength="1200"></textarea></div>
+</div><div class="modal-actions"><button type="button" class="btn secondary" id="cancel">Отмена</button><button class="btn" type="submit">Сохранить в книгу</button></div></form></section></div>
+
+<div class="modal" id="expenseModal" hidden><section class="dialog">
+  <h2>Выплаты помощнику</h2><p class="dialog-note">Каждая выплата вычитается из общего остатка. Старые выплаты можно исправить или удалить.</p>
+  <form id="expenseForm"><div class="form">
+    <div class="field"><span>Сумма выплаты</span><input name="amount" type="number" min="0.01" step=".01" placeholder="Сумма" required></div>
+    <div class="field"><span>Валюта</span><select name="currency"><option value="Медная монета">Медная монета</option><option value="Серебряная монета">Серебряная монета</option><option value="Золотая монета">Золотая монета</option><option value="Электрумовая монета">Электрумовая монета</option><option value="Платиновая монета">Платиновая монета</option></select></div>
+    <div class="field wide"><span>Примечание (необязательно)</span><input name="note" maxlength="180" placeholder="Например: помощь с поиском клиентов"></div>
+  </div><div class="modal-actions"><button type="button" class="btn secondary" id="expenseCancel">Закрыть</button><button class="btn" type="submit" id="expenseSubmit">Добавить выплату</button></div></form>
+  <div class="expense-history-title">История выплат</div><div id="expenseHistory"></div>
+</section></div>
+
 <script>
 (()=>{
 const KEY='zhizhel-funeral-ledger-v1';
@@ -69,28 +198,79 @@ const COIN_PARTS=[
 ];
 const COPPER_FORMS=['медная монета','медные монеты','медных монет','медной монеты'];
 const pluralRules=new Intl.PluralRules('ru-RU');
-let pages=[{entries:[]}],page=0,editing=null;
-const $=s=>document.querySelector(s),form=$('#form');
+let pages=[{entries:[],drawings:[]}],page=0,editing=null,expenses=[],editingExpenseId=null;
+let inkMode='off',selectedStrokeId=null,activeStroke=null,dragState=null,penWidth=3;
+const $=s=>document.querySelector(s);
+const form=$('#form'),expenseForm=$('#expenseForm'),canvas=$('#inkCanvas');
+const ctx=canvas.getContext('2d');
 
-function save(){localStorage.setItem(KEY,JSON.stringify({pages,page}))}
-function normalizePages(list){
- return list.map(p=>({...p,entries:(p.entries||[]).map(e=>{
-  const currency=currencyMap[e.currency]||e.currency||'Золотая монета';
-  return {...e,currency,expense:e.expense??'',expenseCurrency:currencyMap[e.expenseCurrency]||e.expenseCurrency||currency};
- })}));
+function makeId(){return (crypto&&crypto.randomUUID)?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(36).slice(2)}
+function save(){localStorage.setItem(KEY,JSON.stringify({pages,page,expenses}))}
+function normalizeTime(value,fallback){
+ if(typeof value==='number'&&Number.isFinite(value)&&value>0)return value;
+ if(typeof value==='string'&&value.trim()){
+  const numeric=Number(value);
+  if(Number.isFinite(numeric)&&numeric>0)return numeric;
+  const parsed=Date.parse(value);
+  if(Number.isFinite(parsed))return parsed;
+ }
+ return fallback;
+}
+function normalizePages(list,migrateLegacy){
+ const normalized=[],legacyExpenses=[],pageMap=[];
+ let sequence=1;
+ (Array.isArray(list)?list:[]).forEach((p,index)=>{
+  pageMap[index]=normalized.length;
+  const entries=(Array.isArray(p.entries)?p.entries:[]).map(e=>{
+   const createdAt=normalizeTime(e.createdAt,sequence++);
+   if(migrateLegacy&&Number(e.expense)>0){
+    legacyExpenses.push({id:makeId(),amount:String(e.expense),currency:currencyMap[e.expenseCurrency]||currencyMap[e.currency]||e.expenseCurrency||e.currency||'Золотая монета',note:'Перенесено из записи: '+(e.name||'без имени'),createdAt});
+   }
+   const clean={...e};
+   delete clean.expense;
+   delete clean.expenseCurrency;
+   return {...clean,currency:currencyMap[e.currency]||e.currency||'Золотая монета',relatives:Array.isArray(e.relatives)?e.relatives:[],createdAt};
+  });
+  const drawings=Array.isArray(p.drawings)?p.drawings:[];
+  if(!entries.length)normalized.push({entries:[],drawings});
+  else for(let i=0;i<entries.length;i+=5)normalized.push({entries:entries.slice(i,i+5),drawings:i===0?drawings:[]});
+ });
+ if(!normalized.length)normalized.push({entries:[],drawings:[]});
+ return {pages:normalized,legacyExpenses,pageMap};
+}
+function normalizeExpenses(list){
+ let sequence=1;
+ return (Array.isArray(list)?list:[]).map(e=>({
+  id:e.id||makeId(),
+  amount:String(e.amount??''),
+  currency:currencyMap[e.currency]||e.currency||'Золотая монета',
+  note:String(e.note||''),
+  createdAt:normalizeTime(e.createdAt,sequence++)
+ }));
 }
 function load(){
  try{
-  const x=JSON.parse(localStorage.getItem(KEY)||'null');
-  if(x&&Array.isArray(x.pages)&&x.pages.length){pages=normalizePages(x.pages);page=Math.min(x.page||0,pages.length-1)}
+  const data=JSON.parse(localStorage.getItem(KEY)||'null');
+  if(data&&Array.isArray(data.pages)){
+   const normalized=normalizePages(data.pages,!Array.isArray(data.expenses));
+   pages=normalized.pages;
+   expenses=Array.isArray(data.expenses)?normalizeExpenses(data.expenses):normalized.legacyExpenses;
+   const oldPage=Math.max(0,Math.min(Number(data.page)||0,normalized.pageMap.length-1));
+   page=normalized.pageMap[oldPage]??0;
+  }
  }catch(e){}
+}
+function nextTimestamp(){
+ let latest=0;
+ pages.forEach(p=>(p.entries||[]).forEach(e=>latest=Math.max(latest,Number(e.createdAt)||0)));
+ expenses.forEach(e=>latest=Math.max(latest,Number(e.createdAt)||0));
+ return Math.max(Date.now(),latest+1);
 }
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function formatAmount(value){return Number((Number(value)||0).toFixed(2)).toLocaleString('ru-RU',{maximumFractionDigits:2})}
 function amountToSubCopper(amount,currency){
  const normalized=currencyMap[currency]||currency;
- const rate=COIN_VALUES[normalized]||0;
- return Math.round((Number(amount)||0)*rate*100);
+ return Math.round((Number(amount)||0)*(COIN_VALUES[normalized]||0)*100);
 }
 function coinNoun(amount,forms){
  if(!Number.isInteger(amount))return forms[3];
@@ -99,8 +279,7 @@ function coinNoun(amount,forms){
 }
 function formatMoney(total){
  let rest=Math.abs(Math.round(Number(total)||0));
- const negative=Number(total)<0;
- const parts=[];
+ const negative=Number(total)<0,parts=[];
  for(const coin of COIN_PARTS){
   const count=Math.floor(rest/coin.value);
   if(count>0){parts.push(formatAmount(count)+' '+coinNoun(count,coin.forms));rest-=count*coin.value}
@@ -110,39 +289,51 @@ function formatMoney(total){
  if(!parts.length)parts.push('0 медных монет');
  return (negative?'−':'')+parts.join(' · ');
 }
+function formatPeople(n){
+ const category=pluralRules.select(n);
+ return n+' '+(category==='one'?'человек':category==='few'?'человека':'человек');
+}
 function runningBalances(){
- const balances=new Map();
+ const events=[];
+ let order=0;
+ pages.forEach(p=>(p.entries||[]).forEach(e=>events.push({kind:'income',time:Number(e.createdAt)||0,order:order++,id:e.id,amount:e.amount,currency:e.currency})));
+ expenses.forEach(e=>events.push({kind:'expense',time:Number(e.createdAt)||0,order:order++,amount:e.amount,currency:e.currency}));
+ events.sort((a,b)=>a.time-b.time||a.order-b.order);
  let balance=0;
- for(const p of pages){
-  for(const e of p.entries||[]){
-   balance+=amountToSubCopper(e.amount,e.currency)-amountToSubCopper(e.expense,e.expenseCurrency||e.currency);
-   balances.set(e.id,balance);
-  }
- }
+ const balances=new Map();
+ events.forEach(event=>{
+  const value=amountToSubCopper(event.amount,event.currency);
+  balance+=event.kind==='income'?value:-value;
+  if(event.kind==='income')balances.set(event.id,balance);
+ });
  return balances;
 }
 function updateStats(){
  const all=pages.flatMap(p=>p.entries||[]);
- const people=all.reduce((count,e)=>count+1+(Array.isArray(e.relatives)?e.relatives.filter(name=>String(name||'').trim()).length:0),0);
- let earned=0,spent=0;
- all.forEach(e=>{
-  earned+=amountToSubCopper(e.amount,e.currency);
-  spent+=amountToSubCopper(e.expense,e.expenseCurrency||e.currency);
- });
- $('#peopleCount').textContent=String(people);
- $('#earnedTotal').textContent=formatMoney(earned);
- $('#spentTotal').textContent=formatMoney(spent);
- $('#netTotal').textContent=formatMoney(earned-spent);
+ const people=all.reduce((n,e)=>n+1+(Array.isArray(e.relatives)?e.relatives.filter(x=>String(x||'').trim()).length:0),0);
+ const earned=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
+ const spent=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
+ all.forEach(e=>{const c=currencyMap[e.currency]||e.currency;if(Object.prototype.hasOwnProperty.call(earned,c))earned[c]+=Number(e.amount)||0});
+ expenses.forEach(e=>{const c=currencyMap[e.currency]||e.currency;if(Object.prototype.hasOwnProperty.call(spent,c))spent[c]+=Number(e.amount)||0});
+ let earnedValue=0,spentValue=0;
+ CURRENCIES.forEach(c=>{earnedValue+=amountToSubCopper(earned[c],c);spentValue+=amountToSubCopper(spent[c],c)});
+ $('#peopleSummary').textContent=formatPeople(people);
+ $('#earnedSummary').textContent=formatMoney(earnedValue);
+ $('#earnedTotal').textContent=formatMoney(earnedValue);
+ $('#spentTotal').textContent=formatMoney(spentValue);
+ $('#netTotal').textContent=formatMoney(earnedValue-spentValue);
+ $('#coinRows').innerHTML=CURRENCIES.map(c=>'<div class="coin-row"><span>'+c+'</span><strong>'+formatAmount(earned[c])+'</strong><strong>'+formatAmount(spent[c])+'</strong></div>').join('');
 }
 function relatives(){return [...$('#relatives').querySelectorAll('input')].map(x=>x.value.trim()).filter(Boolean)}
-function relInput(value=''){
+function relInput(value){
  const d=document.createElement('div');d.className='relrow';
  d.innerHTML='<input maxlength="120" placeholder="Имя — степень родства"><button type="button" class="rel-remove" aria-label="Удалить родственника">×</button>';
- d.querySelector('input').value=value;d.querySelector('button').onclick=()=>d.remove();$('#relatives').append(d);
+ d.querySelector('input').value=value||'';
+ d.querySelector('button').onclick=()=>d.remove();
+ $('#relatives').append(d);
 }
 function render(){
- const p=pages[page];
- const balances=runningBalances();
+ const p=pages[page],balances=runningBalances();
  $('#pageLabel').textContent='Лист '+(page+1);
  $('#footPage').textContent=page+1;
  $('#total').textContent=pages.reduce((n,x)=>n+x.entries.length,0)+' записей';
@@ -151,75 +342,300 @@ function render(){
  $('#entries').innerHTML=p.entries.map(e=>{
   const status={alive:'Жив',dead:'Мёртв',undead:'Нежить'}[e.status]||'Жив';
   const money=e.amount!==''&&e.amount!=null?esc(e.amount)+' '+esc(e.currency):'не указана';
-  const expense=Number(e.expense)>0?'<div class="details"><strong>Траты помощнику:</strong> '+esc(e.expense)+' '+esc(e.expenseCurrency||e.currency)+'</div>':'';
   const balance=formatMoney(balances.get(e.id)||0);
-  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Получено:</strong> '+money+'</div>'+expense+'<div class="details"><strong>Родня:</strong> '+(e.relatives?.length?e.relatives.map(esc).join(' · '):'не указана')+'</div><div class="details entry-balance"><strong>Остаток после записи:</strong> '+esc(balance)+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
+  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div><div class="details"><strong>Родня:</strong> '+(e.relatives.length?e.relatives.map(esc).join(' · '):'не указана')+'</div><div class="details entry-balance"><strong>Остаток после записи:</strong> '+esc(balance)+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
  }).join('');
  $('#empty').hidden=p.entries.length>0;
  $('#entries').hidden=!p.entries.length;
- $('#prev').disabled=page===0;
  updateStats();
  save();
+ requestAnimationFrame(resizeCanvas);
 }
-function open(e){
- editing=e?.id||null;form.reset();$('#relatives').replaceChildren();
+function openEntry(e){
+ editing=e?e.id:null;
+ form.reset();$('#relatives').replaceChildren();
  $('#modalTitle').textContent=e?'Исправить запись':'Новая запись';
  if(e){
-  form.elements.name.value=e.name;form.elements.age.value=e.age;form.elements.status.value=e.status;
-  form.elements.amount.value=e.amount??'';form.elements.currency.value=e.currency;
-  form.elements.expense.value=e.expense??'';form.elements.expenseCurrency.value=e.expenseCurrency||e.currency;
-  form.elements.comment.value=e.comment;(e.relatives||[]).forEach(relInput);
- }else{
-  form.elements.currency.value='Золотая монета';
-  form.elements.expenseCurrency.value='Золотая монета';
- }
+  form.elements.name.value=e.name||'';
+  form.elements.age.value=e.age||'';
+  form.elements.status.value=e.status||'alive';
+  form.elements.amount.value=e.amount??'';
+  form.elements.currency.value=e.currency||'Золотая монета';
+  form.elements.comment.value=e.comment||'';
+  (e.relatives||[]).forEach(relInput);
+ }else form.elements.currency.value='Золотая монета';
  if(!e||!e.relatives?.length)relInput();
- $('#modal').hidden=false;form.elements.name.focus();
+ $('#modal').hidden=false;
+ form.elements.name.focus();
 }
-function close(){$('#modal').hidden=true;editing=null}
-$('#add').onclick=()=>open();
-$('#cancel').onclick=close;
-$('#addRelative').onclick=()=>relInput();
-$('#modal').addEventListener('click',e=>{if(e.target===$('#modal'))close()});
+function closeEntry(){$('#modal').hidden=true;editing=null}
+function openExpenseModal(){
+ editingExpenseId=null;expenseForm.reset();
+ expenseForm.elements.currency.value='Золотая монета';
+ $('#expenseSubmit').textContent='Добавить выплату';
+ renderExpenseHistory();
+ $('#expenseModal').hidden=false;
+}
+function closeExpenseModal(){$('#expenseModal').hidden=true;editingExpenseId=null;expenseForm.reset();$('#expenseSubmit').textContent='Добавить выплату'}
+function renderExpenseHistory(){
+ const list=$('#expenseHistory');
+ if(!expenses.length){list.innerHTML='<div class="expense-empty">Выплат пока нет.</div>';return}
+ list.innerHTML=expenses.slice().sort((a,b)=>b.createdAt-a.createdAt).map(e=>'<div class="expense-row"><div class="expense-row-main"><strong>'+esc(e.amount)+' '+esc(e.currency)+'</strong><small>'+esc(e.note||'Выплата помощнику')+'</small></div><div class="expense-row-actions"><button type="button" data-edit-expense="'+e.id+'">Изменить</button><button type="button" data-del-expense="'+e.id+'">Удалить</button></div></div>').join('');
+}
+$('#add').onclick=()=>openEntry(null);
+$('#cancel').onclick=closeEntry;
+$('#addRelative').onclick=()=>relInput('');
+$('#modal').addEventListener('click',e=>{if(e.target===$('#modal'))closeEntry()});
 form.onsubmit=e=>{
  e.preventDefault();
+ let existing=null;
+ if(editing)for(const p of pages){existing=p.entries.find(x=>x.id===editing)||existing}
  const data={
-  id:editing||crypto.randomUUID(),name:form.elements.name.value.trim(),age:form.elements.age.value,
-  status:form.elements.status.value,amount:form.elements.amount.value,currency:form.elements.currency.value,
-  expense:form.elements.expense.value,expenseCurrency:form.elements.expenseCurrency.value,
+  id:editing||makeId(),createdAt:existing?existing.createdAt:nextTimestamp(),
+  name:form.elements.name.value.trim(),age:form.elements.age.value,status:form.elements.status.value,
+  amount:form.elements.amount.value,currency:form.elements.currency.value,
   relatives:relatives(),comment:form.elements.comment.value.trim()
  };
  if(!data.name)return;
  if(editing){
   for(const p of pages){const i=p.entries.findIndex(x=>x.id===editing);if(i>=0){p.entries[i]=data;break}}
- }else pages[page].entries.push(data);
- close();render();
+ }else{
+  let target=page;
+  if(pages[target].entries.length>=5){
+   target=-1;
+   for(let i=page+1;i<pages.length;i++)if(pages[i].entries.length<5){target=i;break}
+   if(target<0){pages.push({entries:[],drawings:[]});target=pages.length-1}
+   page=target;
+  }
+  pages[target].entries.push(data);
+ }
+ closeEntry();render();
 };
 $('#entries').onclick=e=>{
- const id=e.target.dataset.edit||e.target.dataset.del;if(!id)return;
+ const id=e.target.dataset.edit||e.target.dataset.del;
+ if(!id)return;
  for(const p of pages){
-  const i=p.entries.findIndex(x=>x.id===id);if(i<0)continue;
-  if(e.target.dataset.edit)open(p.entries[i]);
+  const i=p.entries.findIndex(x=>x.id===id);
+  if(i<0)continue;
+  if(e.target.dataset.edit)openEntry(p.entries[i]);
   else if(confirm('Удалить эту запись?'))p.entries.splice(i,1);
   render();break;
  }
 };
-$('#prev').onclick=()=>{if(page>0){page--;render()}};
-$('#next').onclick=()=>{if(page===pages.length-1)pages.push({entries:[]});page++;render()};
+$('#prev').onclick=()=>{if(page>0){page--;selectedStrokeId=null;render()}};
+$('#next').onclick=()=>{if(page===pages.length-1)pages.push({entries:[],drawings:[]});page++;selectedStrokeId=null;render()};
+$('#toggleStats').onclick=()=>{
+ const panel=$('#statsPanel'),open=panel.hidden;
+ panel.hidden=!open;
+ $('#toggleStats').setAttribute('aria-expanded',String(open));
+ $('#toggleStats').innerHTML=open?'Скрыть монетную ведомость <span>⌃</span>':'Монетная ведомость <span>⌄</span>';
+};
+$('#manageExpenses').onclick=openExpenseModal;
+$('#expenseCancel').onclick=closeExpenseModal;
+$('#expenseModal').addEventListener('click',e=>{if(e.target===$('#expenseModal'))closeExpenseModal()});
+expenseForm.onsubmit=e=>{
+ e.preventDefault();
+ const amount=Number(expenseForm.elements.amount.value);
+ if(!(amount>0))return;
+ const currency=expenseForm.elements.currency.value;
+ const note=expenseForm.elements.note.value.trim();
+ if(editingExpenseId){
+  const old=expenses.find(x=>x.id===editingExpenseId);
+  if(old){old.amount=String(amount);old.currency=currency;old.note=note}
+ }else expenses.push({id:makeId(),amount:String(amount),currency,note,createdAt:nextTimestamp()});
+ editingExpenseId=null;
+ expenseForm.reset();expenseForm.elements.currency.value='Золотая монета';
+ $('#expenseSubmit').textContent='Добавить выплату';
+ render();renderExpenseHistory();
+};
+$('#expenseHistory').onclick=e=>{
+ const editId=e.target.dataset.editExpense,deleteId=e.target.dataset.delExpense;
+ if(editId){
+  const item=expenses.find(x=>x.id===editId);if(!item)return;
+  editingExpenseId=editId;
+  expenseForm.elements.amount.value=item.amount;
+  expenseForm.elements.currency.value=item.currency;
+  expenseForm.elements.note.value=item.note||'';
+  $('#expenseSubmit').textContent='Сохранить выплату';
+ }else if(deleteId&&confirm('Удалить эту выплату?')){
+  expenses=expenses.filter(x=>x.id!==deleteId);
+  if(editingExpenseId===deleteId){editingExpenseId=null;expenseForm.reset();expenseForm.elements.currency.value='Золотая монета';$('#expenseSubmit').textContent='Добавить выплату'}
+  render();renderExpenseHistory();
+ }
+};
 $('#export').onclick=()=>{
- const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',pages,page},null,2)],{type:'application/json'}));
+ const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',pages,page,expenses},null,2)],{type:'application/json'}));
  a.href=u;a.download='zhizhel-ledger-backup.json';a.click();URL.revokeObjectURL(u);
 };
 $('#import').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{
- const f=e.target.files[0];if(!f)return;
+ const file=e.target.files[0];if(!file)return;
  try{
-  const x=JSON.parse(await f.text());if(x.app!=='zhizhel-funeral-ledger'||!Array.isArray(x.pages))throw Error();
-  if(confirm('Заменить текущую книгу данными из файла?')){pages=x.pages.length?normalizePages(x.pages):[{entries:[]}];page=Math.min(x.page||0,pages.length-1);render()}
- }catch(e){alert('Не удалось прочитать резервную копию')}
+  const data=JSON.parse(await file.text());
+  if(data.app!=='zhizhel-funeral-ledger'||!Array.isArray(data.pages))throw Error();
+  if(confirm('Заменить текущую книгу данными из файла?')){
+   const normalized=normalizePages(data.pages,!Array.isArray(data.expenses));
+   pages=normalized.pages;
+   expenses=Array.isArray(data.expenses)?normalizeExpenses(data.expenses):normalized.legacyExpenses;
+   const oldPage=Math.max(0,Math.min(Number(data.page)||0,normalized.pageMap.length-1));
+   page=normalized.pageMap[oldPage]??0;
+   selectedStrokeId=null;render();
+  }
+ }catch(err){alert('Не удалось прочитать резервную копию')}
  e.target.value='';
 };
-document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
-load();render();
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'){if(!$('#expenseModal').hidden)closeExpenseModal();else if(!$('#modal').hidden)closeEntry()}
+});
+
+/* Ink and movable pen strokes */
+function currentDrawings(){if(!Array.isArray(pages[page].drawings))pages[page].drawings=[];return pages[page].drawings}
+function updateInkControls(){
+ $('#deleteStroke').disabled=!selectedStrokeId;
+ document.querySelectorAll('[data-ink-mode]').forEach(b=>b.classList.toggle('tool-active',b.dataset.inkMode===inkMode));
+ canvas.classList.toggle('active',inkMode!=='off');
+ canvas.classList.toggle('select-mode',inkMode==='select');
+ canvas.classList.toggle('dragging',!!dragState);
+}
+function setInkMode(mode){inkMode=mode;updateInkControls();drawStrokes()}
+function resizeCanvas(){
+ if(!canvas||!ctx)return;
+ const rect=canvas.getBoundingClientRect();if(!rect.width||!rect.height)return;
+ const ratio=Math.max(1,window.devicePixelRatio||1);
+ canvas.width=Math.round(rect.width*ratio);canvas.height=Math.round(rect.height*ratio);
+ ctx.setTransform(ratio,0,0,ratio,0,0);
+ drawStrokes();
+}
+function drawStrokes(){
+ if(!ctx||!canvas)return;
+ const rect=canvas.getBoundingClientRect(),w=rect.width,h=rect.height;
+ if(!w||!h)return;
+ ctx.clearRect(0,0,w,h);
+ currentDrawings().forEach(stroke=>{
+  const points=Array.isArray(stroke.points)?stroke.points:[];
+  if(!points.length)return;
+  const base=Math.max(.65,(Number(stroke.width)||.004)*w);
+  ctx.save();ctx.strokeStyle='#17110d';ctx.fillStyle='#17110d';ctx.lineCap='round';ctx.lineJoin='round';
+  if(points.length===1){
+   const p=points[0],r=base*(.55+(Number(p.p)||.5)*.9)/2;
+   ctx.beginPath();ctx.arc(p.x*w,p.y*h,r,0,Math.PI*2);ctx.fill();
+  }else{
+   let previousMid=null;
+   for(let i=1;i<points.length;i++){
+    const a=points[i-1],b=points[i];
+    const ax=a.x*w,ay=a.y*h,bx=b.x*w,by=b.y*h;
+    const mx=(ax+bx)/2,my=(ay+by)/2;
+    ctx.beginPath();
+    if(previousMid)ctx.moveTo(previousMid.x,previousMid.y);else ctx.moveTo(ax,ay);
+    ctx.quadraticCurveTo(ax,ay,mx,my);
+    const pressure=((Number(a.p)||.5)+(Number(b.p)||.5))/2;
+    ctx.lineWidth=base*(.55+pressure*.9);
+    ctx.stroke();
+    previousMid={x:mx,y:my};
+   }
+   const last=points[points.length-1],before=points[points.length-2];
+   ctx.beginPath();ctx.moveTo(previousMid.x,previousMid.y);ctx.lineTo(last.x*w,last.y*h);
+   ctx.lineWidth=base*(.55+(((Number(last.p)||.5)+(Number(before.p)||.5))/2)*.9);ctx.stroke();
+  }
+  if(stroke.id===selectedStrokeId){
+   const xs=points.map(p=>p.x*w),ys=points.map(p=>p.y*h);
+   const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys),maxY=Math.max(...ys);
+   ctx.strokeStyle='rgba(80,48,24,.8)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+   ctx.strokeRect(minX-7,minY-7,Math.max(14,maxX-minX+14),Math.max(14,maxY-minY+14));
+  }
+  ctx.restore();
+ });
+}
+function pointerPosition(e){
+ const r=canvas.getBoundingClientRect();
+ return {x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height)),p:e.pressure>0?e.pressure:.5};
+}
+function pointDistance(x,y,a,b){
+ const dx=b.x-a.x,dy=b.y-a.y;
+ if(dx===0&&dy===0)return Math.hypot(x-a.x,y-a.y);
+ const t=Math.max(0,Math.min(1,((x-a.x)*dx+(y-a.y)*dy)/(dx*dx+dy*dy)));
+ return Math.hypot(x-(a.x+t*dx),y-(a.y+t*dy));
+}
+function hitStroke(pos){
+ const r=canvas.getBoundingClientRect(),px=pos.x*r.width,py=pos.y*r.height;
+ let best=null,bestDistance=Math.max(12,penWidth*2.5);
+ currentDrawings().forEach(stroke=>{
+  const pts=stroke.points||[];let distance=Infinity;
+  if(pts.length===1)distance=Math.hypot(px-pts[0].x*r.width,py-pts[0].y*r.height);
+  else for(let i=1;i<pts.length;i++){
+   const a={x:pts[i-1].x*r.width,y:pts[i-1].y*r.height},b={x:pts[i].x*r.width,y:pts[i].y*r.height};
+   distance=Math.min(distance,pointDistance(px,py,a,b));
+  }
+  if(distance<bestDistance){bestDistance=distance;best=stroke}
+ });
+ return best;
+}
+canvas.addEventListener('pointerdown',e=>{
+ if(inkMode==='off')return;
+ e.preventDefault();
+ const pos=pointerPosition(e);
+ if(canvas.setPointerCapture)canvas.setPointerCapture(e.pointerId);
+ if(inkMode==='draw'){
+  const r=canvas.getBoundingClientRect();
+  activeStroke={id:makeId(),width:penWidth/Math.max(1,r.width),points:[pos]};
+  currentDrawings().push(activeStroke);selectedStrokeId=activeStroke.id;
+ }else{
+  const found=hitStroke(pos);selectedStrokeId=found?found.id:null;
+  if(found){
+   dragState={id:found.id,start:pos,points:found.points.map(p=>({...p}))};
+  }
+ }
+ updateInkControls();drawStrokes();
+});
+canvas.addEventListener('pointermove',e=>{
+ if(activeStroke){
+  e.preventDefault();
+  const pos=pointerPosition(e),last=activeStroke.points[activeStroke.points.length-1];
+  if(Math.hypot(pos.x-last.x,pos.y-last.y)>.00035)activeStroke.points.push(pos);
+  drawStrokes();
+ }else if(dragState){
+  e.preventDefault();
+  const stroke=currentDrawings().find(x=>x.id===dragState.id);if(!stroke)return;
+  const pos=pointerPosition(e),dx=pos.x-dragState.start.x,dy=pos.y-dragState.start.y;
+  const xs=dragState.points.map(p=>p.x),ys=dragState.points.map(p=>p.y);
+  const minDx=-Math.min(...xs),maxDx=1-Math.max(...xs),minDy=-Math.min(...ys),maxDy=1-Math.max(...ys);
+  const moveX=Math.max(minDx,Math.min(maxDx,dx)),moveY=Math.max(minDy,Math.min(maxDy,dy));
+  stroke.points=dragState.points.map(p=>({...p,x:p.x+moveX,y:p.y+moveY}));
+  drawStrokes();
+ }
+});
+function finishPointer(){
+ if(activeStroke||dragState)save();
+ activeStroke=null;dragState=null;updateInkControls();drawStrokes();
+}
+canvas.addEventListener('pointerup',finishPointer);
+canvas.addEventListener('pointercancel',finishPointer);
+$('#inkToggle').onclick=()=>{
+ const toolbar=$('#inkToolbar'),open=toolbar.hidden;
+ toolbar.hidden=!open;
+ if(open){$('#inkToggle').setAttribute('aria-pressed','true');setInkMode('draw')}
+ else{$('#inkToggle').setAttribute('aria-pressed','false');selectedStrokeId=null;setInkMode('off')}
+};
+document.querySelectorAll('[data-ink-mode]').forEach(b=>b.onclick=()=>setInkMode(b.dataset.inkMode));
+$('#penWidth').oninput=e=>{penWidth=Number(e.target.value);$('#penWidthValue').textContent=penWidth+' px'};
+$('#deleteStroke').onclick=()=>{
+ if(!selectedStrokeId)return;
+ pages[page].drawings=currentDrawings().filter(s=>s.id!==selectedStrokeId);
+ selectedStrokeId=null;save();updateInkControls();drawStrokes();
+};
+$('#clearDrawings').onclick=()=>{
+ if(!currentDrawings().length)return;
+ if(confirm('Удалить все рисунки и росписи с этой страницы?')){
+  pages[page].drawings=[];selectedStrokeId=null;save();updateInkControls();drawStrokes();
+ }
+};
+$('#closeInk').onclick=()=>{
+ $('#inkToolbar').hidden=true;$('#inkToggle').setAttribute('aria-pressed','false');selectedStrokeId=null;setInkMode('off');
+};
+$('#export').addEventListener('click',()=>{$('.more-tools').open=false});
+$('#import').addEventListener('click',()=>{$('.more-tools').open=false});
+if(typeof ResizeObserver!=='undefined')new ResizeObserver(resizeCanvas).observe($('.page'));
+window.addEventListener('resize',resizeCanvas);
+load();render();updateInkControls();resizeCanvas();
 })();
 </script></body></html>
