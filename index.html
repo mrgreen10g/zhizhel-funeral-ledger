@@ -109,6 +109,19 @@ button.stats-total:hover{border-color:#d7b97e;background:#3a2419}
  .expense-row-actions{gap:4px}
 }
 
+
+/* Hand-drawn status marks and handwritten status tally */
+.status-tally{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:clamp(14px,3vw,30px);margin:-12px 0 24px;color:#ead7b4;font:24px/1.25 var(--script);text-align:center;text-shadow:0 1px 8px #c19a5826}
+.status-tally span{white-space:nowrap}
+.status-tally b{color:#f3dfb8;font:26px var(--script)}
+.entry-status-wrap{display:inline-flex;align-items:center;gap:7px;flex-shrink:0}
+.status-mark{width:27px;height:27px;display:block;overflow:visible;filter:drop-shadow(0 1px 1px #5b402555)}
+.status-mark path,.status-mark rect,.status-mark circle,.status-mark line{vector-effect:non-scaling-stroke}
+.entry-status{padding:3px 7px}
+.entry-status.alive{color:#38633d}
+.entry-status.dead{color:#843c2d}
+.entry-status.undead{color:#604b82}
+
 </style><link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -148,6 +161,11 @@ button.stats-total:hover{border-color:#d7b97e;background:#3a2419}
 <p class="stats-note">Все суммы сведены по курсу D&amp;D: 10 медных = 1 серебряная, 2 электрумовые = 1 золотая, 10 золотых = 1 платиновая.</p>
 <main>
   <p class="intro">✦ Имена, которые ещё можно оплакать ✦</p>
+  <div class="status-tally" aria-label="Количество записанных людей по статусам">
+    <span>Ж — <b id="aliveCount">0</b></span>
+    <span>М — <b id="deadCount">0</b></span>
+    <span>Н — <b id="undeadCount">0</b></span>
+  </div>
   <section class="ink-toolbar" id="inkToolbar" hidden>
     <div class="ink-modes"><button type="button" data-ink-mode="draw" class="tool-active">Перо</button><button type="button" data-ink-mode="select">Переместить</button></div>
     <label class="pen-size">Толщина пера <input id="penWidth" type="range" min="1" max="12" value="3"><output id="penWidthValue">3 px</output></label>
@@ -185,6 +203,7 @@ button.stats-total:hover{border-color:#d7b97e;background:#3a2419}
 </section></div>
 
 <script>
+
 (()=>{
 const KEY='zhizhel-funeral-ledger-v1';
 const CURRENCIES=['Медная монета','Серебряная монета','Золотая монета','Электрумовая монета','Платиновая монета'];
@@ -311,6 +330,11 @@ function runningBalances(){
 function updateStats(){
  const all=pages.flatMap(p=>p.entries||[]);
  const people=all.reduce((n,e)=>n+1+(Array.isArray(e.relatives)?e.relatives.filter(x=>String(x||'').trim()).length:0),0);
+ const statusCounts={alive:0,dead:0,undead:0};
+ all.forEach(e=>{const status=statusCounts.hasOwnProperty(e.status)?e.status:'alive';statusCounts[status]++});
+ $('#aliveCount').textContent=String(statusCounts.alive);
+ $('#deadCount').textContent=String(statusCounts.dead);
+ $('#undeadCount').textContent=String(statusCounts.undead);
  const earned=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
  const spent=Object.fromEntries(CURRENCIES.map(c=>[c,0]));
  all.forEach(e=>{const c=currencyMap[e.currency]||e.currency;if(Object.prototype.hasOwnProperty.call(earned,c))earned[c]+=Number(e.amount)||0});
@@ -332,8 +356,13 @@ function relInput(value){
  d.querySelector('button').onclick=()=>d.remove();
  $('#relatives').append(d);
 }
+function statusDrawing(status){
+ if(status==='dead')return '<svg class="status-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 27V14a10 10 0 0 1 20 0v13Z" fill="#b9a184" stroke="#59402d" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 27V15a6 6 0 0 1 12 0v12" fill="none" stroke="#eee0c2" stroke-width="1.1"/><path d="M16 9v7m-3.5-3.5h7M11 21h10" stroke="#6c4a34" stroke-width="1.4" stroke-linecap="round"/><path d="M4 28h24" stroke="#59402d" stroke-width="2" stroke-linecap="round"/></svg>';
+ if(status==='undead')return '<svg class="status-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M5 13C5 6 11 3 17 4c7 1 11 6 10 13-1 7-6 11-13 10C7 26 3 20 5 13Z" fill="#b2b68a" stroke="#4e5639" stroke-width="1.5"/><path d="m9 12 5 2-4 3Zm10 2 5-3-1 6Z" fill="#4e5639" stroke="#4e5639" stroke-linejoin="round"/><path d="M10 21q6-4 13 0l-2 4-8 0Z" fill="#efe0c0" stroke="#4e5639" stroke-width="1.2" stroke-linejoin="round"/><path d="m13 20 1 4m5-4-1 4" stroke="#4e5639" stroke-width="1.1"/><path d="M7 7 5 4m20 4 2-3" stroke="#4e5639" stroke-width="1.3" stroke-linecap="round"/></svg>';
+ return '<svg class="status-mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M16 27S4 19 4 11c0-4 3-7 7-7 2.5 0 4 1.3 5 3 1-1.7 2.5-3 5-3 4 0 7 3 7 7 0 8-12 16-12 16Z" fill="#b85a56" stroke="#713c34" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 11c.3-2 1.8-3.5 3.8-3.5" fill="none" stroke="#f5d9c7" stroke-width="1.3" stroke-linecap="round"/></svg>';
+}
 function render(){
- const p=pages[page],balances=runningBalances();
+ const p=pages[page];
  $('#pageLabel').textContent='Лист '+(page+1);
  $('#footPage').textContent=page+1;
  $('#total').textContent=pages.reduce((n,x)=>n+x.entries.length,0)+' записей';
@@ -342,8 +371,8 @@ function render(){
  $('#entries').innerHTML=p.entries.map(e=>{
   const status={alive:'Жив',dead:'Мёртв',undead:'Нежить'}[e.status]||'Жив';
   const money=e.amount!==''&&e.amount!=null?esc(e.amount)+' '+esc(e.currency):'не указана';
-  const balance=formatMoney(balances.get(e.id)||0);
-  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status '+e.status+'">'+status+'</span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div><div class="details"><strong>Родня:</strong> '+(e.relatives.length?e.relatives.map(esc).join(' · '):'не указана')+'</div><div class="details entry-balance"><strong>Остаток после записи:</strong> '+esc(balance)+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
+  const statusClass=['alive','dead','undead'].includes(e.status)?e.status:'alive';
+  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status-wrap">'+statusDrawing(statusClass)+'<span class="entry-status '+statusClass+'">'+status+'</span></span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div><div class="details"><strong>Родня:</strong> '+(e.relatives.length?e.relatives.map(esc).join(' · '):'не указана')+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
  }).join('');
  $('#empty').hidden=p.entries.length>0;
  $('#entries').hidden=!p.entries.length;
@@ -638,4 +667,5 @@ if(typeof ResizeObserver!=='undefined')new ResizeObserver(resizeCanvas).observe(
 window.addEventListener('resize',resizeCanvas);
 load();render();updateInkControls();resizeCanvas();
 })();
+
 </script></body></html>
