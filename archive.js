@@ -436,6 +436,7 @@ function resizeWorkspace(){
  // At low zoom the visible board may be larger than its original logical extent.
  // Expand the usable coordinate space to cover the whole viewport, not only its texture.
  const board=sceneKind==='board';
+ if(board)vp.style.setProperty('--board-unit',w.zoom+'px');
  const width=board?Math.max(sceneModel.width,Math.ceil(vp.clientWidth/w.zoom)):sceneModel.width;
  const height=board?Math.max(sceneModel.height,Math.ceil(vp.clientHeight/w.zoom)):sceneModel.height;
  sceneModel.viewWidth=width;sceneModel.viewHeight=height;

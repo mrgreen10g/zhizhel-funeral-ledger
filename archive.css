@@ -243,8 +243,21 @@
 @media(max-width:760px){#zoomText{min-width:36px}.workspace-bar .workspace-options{max-width:calc(100vw - 44px)}}
 
 /* Cork fills the viewport and all scrollable space, independently of zoom. */
-.arc-board .workspace-viewport{background:#aa7847}
-.arc-board .workspace-space{background:radial-gradient(circle at 24% 31%,#7f552d66 0 1px,transparent 2px),radial-gradient(circle at 65% 80%,#d0a47855 0 2px,transparent 3px),radial-gradient(circle at 80% 25%,#704c2b80 0 1px,transparent 2px),linear-gradient(105deg,#a57748,#c2915c 45%,#aa7847);background-size:13px 15px,19px 21px,7px 11px,auto;box-shadow:inset 0 0 45px #482d1b55}
+/* A single cork surface, independent of the transformed cards and threads.
+   The same original grain covers the entire visible board at every zoom. */
+.arc-board .workspace-viewport{
+ --board-unit:1px;
+ background:
+  radial-gradient(circle at 24% 31%,#7f552d66 0 calc(1 * var(--board-unit)),transparent calc(2 * var(--board-unit))),
+  radial-gradient(circle at 65% 80%,#d0a47855 0 calc(2 * var(--board-unit)),transparent calc(3 * var(--board-unit))),
+  radial-gradient(circle at 80% 25%,#704c2b80 0 calc(1 * var(--board-unit)),transparent calc(2 * var(--board-unit))),
+  linear-gradient(105deg,#a57748,#c2915c 45%,#aa7847);
+ background-color:#aa7847;
+ background-size:calc(13 * var(--board-unit)) calc(15 * var(--board-unit)),calc(19 * var(--board-unit)) calc(21 * var(--board-unit)),calc(7 * var(--board-unit)) calc(11 * var(--board-unit)),100% 100%;
+ background-repeat:repeat,repeat,repeat,no-repeat;
+ box-shadow:inset 0 0 45px #482d1b55;
+}
+.arc-board .workspace-space,.arc-board .board-scene{background:transparent;box-shadow:none}
 .workspace-wrap{position:relative}
 .board-move-bar{position:absolute;z-index:7;bottom:12px;right:12px;left:auto;max-width:calc(100% - 24px);display:flex;align-items:center;gap:10px;padding:7px 8px 7px 12px;border:1px solid #b38c55;background:linear-gradient(140deg,#493022,#291b14);color:#f1dab0;box-shadow:0 3px 12px #25150e80;border-radius:3px}
 .board-move-bar span{font:600 15px/1.25 var(--display);overflow:hidden;text-overflow:ellipsis;min-width:0}
