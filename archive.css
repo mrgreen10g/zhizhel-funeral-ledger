@@ -152,7 +152,7 @@
 .workspace-space{position:relative;min-width:100%;min-height:100%;overflow:hidden}
 .workspace-scene{position:absolute;left:0;top:0;transform-origin:top left}
 .tree-scene{background:radial-gradient(ellipse at 50% 4%,#fff1cc55,transparent 80%),repeating-linear-gradient(0deg,#835f2410 0 1px,transparent 1px 26px),repeating-linear-gradient(90deg,#835f2409 0 1px,transparent 1px 26px),#e7d3a9}
-.board-scene{background:radial-gradient(circle at 24% 31%,#7f552d66 0 1px,transparent 2px),radial-gradient(circle at 65% 80%,#d0a47855 0 2px,transparent 3px),radial-gradient(circle at 80% 25%,#704c2b80 0 1px,transparent 2px),linear-gradient(105deg,#a57748,#c2915c 45%,#aa7847);background-size:13px 15px,19px 21px,7px 11px,auto;box-shadow:inset 0 0 45px #482d1b55}
+.board-scene{background:transparent}
 .thread-svg{position:absolute;inset:0;overflow:visible;pointer-events:none;z-index:0}
 .thread-svg path{fill:none;stroke-linecap:round;stroke-linejoin:round}
 .thread-svg .tree-thread{stroke:#876544;stroke-width:1.6}
@@ -241,3 +241,17 @@
 .dossier-list:empty{display:none}
 .dossier-layout:has(.dossier-list:empty){grid-template-columns:minmax(0,1fr)}
 @media(max-width:760px){#zoomText{min-width:36px}.workspace-bar .workspace-options{max-width:calc(100vw - 44px)}}
+
+/* Cork fills the viewport and all scrollable space, independently of zoom. */
+.arc-board .workspace-viewport{background:#aa7847}
+.arc-board .workspace-space{background:radial-gradient(circle at 24% 31%,#7f552d66 0 1px,transparent 2px),radial-gradient(circle at 65% 80%,#d0a47855 0 2px,transparent 3px),radial-gradient(circle at 80% 25%,#704c2b80 0 1px,transparent 2px),linear-gradient(105deg,#a57748,#c2915c 45%,#aa7847);background-size:13px 15px,19px 21px,7px 11px,auto;box-shadow:inset 0 0 45px #482d1b55}
+.workspace-wrap{position:relative}
+.board-move-bar{position:absolute;z-index:7;bottom:12px;right:12px;left:auto;max-width:calc(100% - 24px);display:flex;align-items:center;gap:10px;padding:7px 8px 7px 12px;border:1px solid #b38c55;background:linear-gradient(140deg,#493022,#291b14);color:#f1dab0;box-shadow:0 3px 12px #25150e80;border-radius:3px}
+.board-move-bar span{font:600 15px/1.25 var(--display);overflow:hidden;text-overflow:ellipsis;min-width:0}
+.board-move-bar .arc-btn{flex:none;min-height:34px;padding:7px 11px;font-size:15px;background:linear-gradient(#745032,#51331f)}
+.board-move-bar .arc-btn[aria-pressed="true"]{background:#2a1c14}
+.arc-board .workspace-viewport.move-armed{cursor:crosshair}
+.arc-board .board-pin.move-ready{outline:3px dashed #7d1b2a;outline-offset:5px;z-index:4;box-shadow:5px 7px 10px #4a2c2477}
+.arc-board .board-pin.move-ready .node-body{cursor:grab}
+.arc-board .board-pin.move-ready .node-body:active{cursor:grabbing}
+@media(max-width:760px){.board-move-bar{left:7px;right:7px;bottom:8px;max-width:none;justify-content:space-between;gap:7px;padding:6px 7px 6px 10px}.board-move-bar span{font-size:14px}.board-move-bar .arc-btn{font-size:14px}}

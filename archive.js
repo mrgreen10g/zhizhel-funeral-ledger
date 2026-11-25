@@ -47,6 +47,7 @@ const shell=(className,kicker,title,desc,action,body)=>'<div class="arc-frame '+
 function switchChapter(chapter,options={}){
  if(!chapters.some(c=>c[0]===chapter))chapter='book';
  const old=active;active=chapter;
+ if(old==='board'&&chapter!=='board')workspace.board.moving='';
  if(options.person!==undefined)dossierId=str(options.person);
  if(options.record!==undefined)focusRecord=str(options.record);
  if(old!==chapter){const menu=$('#chapterMenu');if(menu)menu.open=false}
@@ -359,7 +360,7 @@ function openSource(key){
 /* Interactive tree and cork board. Positions and edges are saved as data. */
 const boardKinds=[O('clue','Улика'),O('person','Человек'),O('rumor','Слух'),O('place','Место'),O('event','Событие'),O('theory','Теория'),O('quest','Поручение'),O('note','Заметка')];
 const relationTypes=[O('Родство'),O('Дружба'),O('Вражда'),O('Долг'),O('Деловая связь'),O('Союз'),O('Подозрение'),O('Другое')];
-const workspace={tree:{zoom:0.85,selected:'',left:0,top:0,initialized:false},board:{zoom:0.85,selected:'',left:0,top:0,initialized:false}};
+const workspace={tree:{zoom:0.85,selected:'',left:0,top:0,initialized:false},board:{zoom:0.85,selected:'',left:0,top:0,initialized:false,moving:''}};
 let sceneModel=null,sceneKind='';
 function treeModel(){
  const all=people();
@@ -407,20 +408,21 @@ function renderWorkspace(kind){
  if(sceneKind===kind&&oldViewport){w.left=oldViewport.scrollLeft;w.top=oldViewport.scrollTop}
  sceneKind=kind;
  const tree=kind==='tree';
+ if(!tree)w.moving='';
  sceneModel=tree?treeModel():boardModel();
  if(!sceneModel.nodes.some(n=>n.id===w.selected))w.selected='';
  if(!w.selected&&tree)w.selected='root';
  const opts=[O('','Найти на '+(tree?'дереве':'доске')),...sceneModel.nodes.map(n=>O(n.id,n.title+' · '+(tree?(n.kind==='relative'?'родня':n.kind==='root'?'архив':n.origin==='ledger'?'из книги':'знакомый'):labelOf(boardKinds,n.kind))))];
  view.innerHTML=shell(tree?'arc-tree':'arc-board',tree?'Генеалогическое древо · сеть отношений':'Следственное дело · красная нить',tree?'Паутина знакомств':'Доска расследований',tree?'Добавляйте знакомых без оплаты и стройте отношения. Люди и родня из похоронной книги тоже отображаются здесь.':'Прикалывайте заметки, связывайте их красными нитями и меняйте расположение улик.',
  act(tree?'new-contact':'new-pin',tree?'＋ Знакомый':'＋ Улика','','arc-btn'),
- '<div class="workspace-bar"><select id="workspaceFind" aria-label="Найти узел">'+optionMarkup(opts,w.selected)+'</select><span class="zoom-control" id="zoomText" aria-label="Текущий масштаб">'+Math.round(w.zoom*100)+'%</span><details><summary>Инструменты</summary><div class="workspace-options">'+act('workspace-fit','Всё дерево / вся доска')+act('new-link','Добавить связь')+act('show-links','Список связей')+(tree?act('reset-tree','Вернуть исходную раскладку'):'')+'</div></details></div><p class="arc-caption">'+(tree?'Два пальца — масштаб, один — перемещение поля. Карточки двигайте за верхнюю полоску.':'Два пальца — масштаб, один — перемещение поля. Карточки двигайте за верхнюю полоску.')+'</p><div class="workspace-viewport" id="workspaceViewport"><div class="workspace-space" id="workspaceSpace"><div class="workspace-scene '+(tree?'tree-scene':'board-scene')+'" id="workspaceScene"><svg class="thread-svg" id="workspaceThreads" aria-hidden="true"></svg><div id="workspaceNodes"></div></div></div></div><div class="workspace-detail" id="workspaceDetail"></div>');
+ '<div class="workspace-bar"><select id="workspaceFind" aria-label="Найти узел">'+optionMarkup(opts,w.selected)+'</select><span class="zoom-control" id="zoomText" aria-label="Текущий масштаб">'+Math.round(w.zoom*100)+'%</span><details><summary>Инструменты</summary><div class="workspace-options">'+act('workspace-fit','Всё дерево / вся доска')+act('new-link','Добавить связь')+act('show-links','Список связей')+(tree?act('reset-tree','Вернуть исходную раскладку'):'')+'</div></details></div><p class="arc-caption">'+(tree?'Два пальца — масштаб, один — перемещение поля. Карточки двигайте за верхнюю полоску.':'Два пальца — масштаб, один — перемещение поля. Выберите улику и нажмите «Переместить».')+'</p><div class="workspace-wrap"><div class="workspace-viewport" id="workspaceViewport"><div class="workspace-space" id="workspaceSpace"><div class="workspace-scene '+(tree?'tree-scene':'board-scene')+'" id="workspaceScene"><svg class="thread-svg" id="workspaceThreads" aria-hidden="true"></svg><div id="workspaceNodes"></div></div></div></div>'+(!tree?'<div class="board-move-bar" id="boardMoveBar" hidden><span id="boardMoveLabel"></span><button class="arc-btn" type="button" id="boardMoveButton" data-arc="board-move">Переместить</button></div>':'')+'</div><div class="workspace-detail" id="workspaceDetail"></div>');
  const sc=$('#workspaceScene'),vp=$('#workspaceViewport');
  $('#workspaceFind').onchange=e=>{if(e.target.value)selectNode(e.target.value,true)};
 
  sc.style.width=sceneModel.width+'px';sc.style.height=sceneModel.height+'px';
  $('#workspaceNodes').innerHTML=sceneModel.nodes.map(n=>nodeHtml(kind,n,w.selected)).join('');
  if(!sceneModel.nodes.length)$('#workspaceNodes').innerHTML='<div style="padding:45px;color:#4a2d1b;font:22px var(--display)">Прикрепите первую улику.</div>';
- resizeWorkspace();paintThreads();paintWorkspaceDetail();
+ resizeWorkspace();paintThreads();paintWorkspaceDetail();paintBoardMove();
  attachWorkspaceGestures(vp);
  requestAnimationFrame(()=>{if(sceneKind!==kind||!vp.isConnected)return;if(!w.initialized){w.initialized=true;if(tree){const root=sceneModel.nodes.find(n=>n.id==='root');vp.scrollLeft=Math.max(0,(root.x+root.w/2)*w.zoom-vp.clientWidth/2)}}else{vp.scrollLeft=w.left;vp.scrollTop=w.top}});
 }
@@ -429,10 +431,17 @@ function nodeHtml(kind,n,selected){
  return '<div class="'+(tree?'tree-node '+n.kind:'board-pin')+(selected===n.id?' selected':'')+'" data-node="'+val(n.id)+'" data-kind="'+val(n.kind)+'" style="left:'+n.x+'px;top:'+n.y+'px"><div class="node-grip" data-grip="'+val(n.id)+'"><span>'+esc(caption)+'</span><span aria-hidden="true">⋮⋮</span></div><button type="button" class="node-body" data-arc="select-node" data-id="'+val(n.id)+'"><strong>'+esc(n.title)+'</strong><small>'+esc(n.subtitle)+'</small></button></div>';
 }
 function resizeWorkspace(){
- const w=workspace[sceneKind],space=$('#workspaceSpace'),sc=$('#workspaceScene'),svg=$('#workspaceThreads');
- if(!sc||!sceneModel||!w)return;
- sc.style.transform='scale('+w.zoom+')';space.style.width=Math.ceil(sceneModel.width*w.zoom)+'px';space.style.height=Math.ceil(sceneModel.height*w.zoom)+'px';
- svg.setAttribute('width',sceneModel.width);svg.setAttribute('height',sceneModel.height);svg.setAttribute('viewBox','0 0 '+sceneModel.width+' '+sceneModel.height);
+ const w=workspace[sceneKind],space=$('#workspaceSpace'),sc=$('#workspaceScene'),svg=$('#workspaceThreads'),vp=$('#workspaceViewport');
+ if(!sc||!sceneModel||!w||!vp)return;
+ // At low zoom the visible board may be larger than its original logical extent.
+ // Expand the usable coordinate space to cover the whole viewport, not only its texture.
+ const board=sceneKind==='board';
+ const width=board?Math.max(sceneModel.width,Math.ceil(vp.clientWidth/w.zoom)):sceneModel.width;
+ const height=board?Math.max(sceneModel.height,Math.ceil(vp.clientHeight/w.zoom)):sceneModel.height;
+ sceneModel.viewWidth=width;sceneModel.viewHeight=height;
+ sc.style.width=width+'px';sc.style.height=height+'px';
+ sc.style.transform='scale('+w.zoom+')';space.style.width=Math.ceil(width*w.zoom)+'px';space.style.height=Math.ceil(height*w.zoom)+'px';
+ svg.setAttribute('width',width);svg.setAttribute('height',height);svg.setAttribute('viewBox','0 0 '+width+' '+height);
  const zoom=$('#zoomText');if(zoom)zoom.textContent=Math.round(w.zoom*100)+'%';
 }
 function setZoom(value,keepCenter=true,anchor=null){
@@ -459,10 +468,11 @@ function paintThreads(){
 }
 function selectNode(id,center=false){
  const w=workspace[sceneKind],n=sceneModel?.nodes.find(n=>n.id===str(id));if(!w||!n)return;
+ if(sceneKind==='board'&&w.moving&&w.moving!==n.id)w.moving='';
  w.selected=n.id;
  document.querySelectorAll('#workspaceNodes [data-node]').forEach(el=>el.classList.toggle('selected',el.dataset.node===n.id));
  const find=$('#workspaceFind');if(find)find.value=n.id;
- paintWorkspaceDetail();
+ paintWorkspaceDetail();paintBoardMove();
  if(center){const vp=$('#workspaceViewport');vp.scrollLeft=Math.max(0,(n.x+n.w/2)*w.zoom-vp.clientWidth/2);vp.scrollTop=Math.max(0,(n.y+n.h/2)*w.zoom-vp.clientHeight/2)}
 }
 function paintWorkspaceDetail(){
@@ -487,6 +497,37 @@ function paintWorkspaceDetail(){
  }
  detail.innerHTML='<h3>'+esc(n.title)+'</h3>'+body+'<div class="arc-card-actions">'+actions+'</div>'+connections;
 }
+/* Move controls appear directly on the board when a clue is selected. */
+function paintBoardMove(){
+ if(sceneKind!=='board')return;
+ const bar=$('#boardMoveBar'),vp=$('#workspaceViewport'),w=workspace.board;
+ if(!bar||!vp)return;
+ const n=sceneModel?.nodes.find(x=>x.id===w.selected),armed=!!(n&&w.moving===n.id);
+ bar.hidden=!n;
+ if(n){
+  $('#boardMoveLabel').textContent=armed?'Перетащи улику или коснись свободного места':n.title;
+  const button=$('#boardMoveButton');
+  button.textContent=armed?'Отмена':'Переместить';
+  button.setAttribute('aria-pressed',String(armed));
+ }
+ vp.classList.toggle('move-armed',armed);
+ vp.querySelectorAll('[data-node]').forEach(el=>el.classList.toggle('move-ready',armed&&el.dataset.node===w.moving));
+}
+function toggleBoardMove(){
+ if(active!=='board'||sceneKind!=='board')return;
+ const w=workspace.board,n=sceneModel?.nodes.find(x=>x.id===w.selected);if(!n)return;
+ w.moving=w.moving===n.id?'':n.id;
+ paintBoardMove();
+}
+function commitBoardPosition(n){
+ const p=state.boardNodes.find(x=>str(x.id)===n.id);if(!p)return;
+ p.x=n.x;p.y=n.y;
+ // Keep newly occupied parts of the board available after zooming in or reloading.
+ sceneModel.width=Math.max(sceneModel.width,n.x+n.w+50);
+ sceneModel.height=Math.max(sceneModel.height,n.y+n.h+50);
+ if(workspace.board.moving===n.id)workspace.board.moving='';
+ persist();resizeWorkspace();paintThreads();paintBoardMove();
+}
 /* Direct manipulation: pinch about the fingers, pan the viewport, drag a grip.
    The workspace owns touch gestures; the rest of the page keeps normal scrolling. */
 function pinchGeometry(a,b){
@@ -506,8 +547,8 @@ function attachWorkspaceGestures(vp){
   if(kind==='tree'){
    state.graphPositions=state.graphPositions.filter(x=>str(x.id)!==n.id);
    state.graphPositions.push({id:n.id,x:n.x,y:n.y});
-  }else{const p=state.boardNodes.find(p=>str(p.id)===n.id);if(p){p.x=n.x;p.y=n.y}}
-  persist();
+   persist();
+  }else commitBoardPosition(n);
  }
  function restoreDrag(){
   if(gesture?.type!=='node'||!gesture.moved)return;
@@ -519,8 +560,12 @@ function attachWorkspaceGestures(vp){
   gesture={type:'pinch',ids,distance:g.distance,zoom:w.zoom,worldX:(vp.scrollLeft+g.x)/w.zoom,worldY:(vp.scrollTop+g.y)/w.zoom,moved:true};
   suppressClick=true;
  }
- function beginPan(id,p,tapId='',tap=true){
-  gesture={type:'pan',pointer:id,startX:p.x,startY:p.y,left:vp.scrollLeft,top:vp.scrollTop,tapId,tap,moved:false};
+ function beginPan(id,p,tapId='',tap=true,placeId=''){
+  gesture={type:'pan',pointer:id,startX:p.x,startY:p.y,left:vp.scrollLeft,top:vp.scrollTop,tapId,tap,placeId,moved:false};
+ }
+ function boundNode(n,x,y){
+  n.x=Math.max(5,Math.min((sceneModel.viewWidth||sceneModel.width)-n.w-5,x));
+  n.y=Math.max(5,Math.min((sceneModel.viewHeight||sceneModel.height)-n.h-5,y));
  }
  vp.addEventListener('pointerdown',e=>{
   if(sceneKind!==kind||e.button>0)return;
@@ -530,11 +575,11 @@ function attachWorkspaceGestures(vp){
   if(pointers.size>=2){if(pointers.size===2)beginPinch();return}
   suppressClick=false;
   const grip=e.target.closest('[data-grip]'),body=e.target.closest('[data-node]');
-  const n=grip&&currentNode(grip.dataset.grip);
+  const n=(grip&&currentNode(grip.dataset.grip))||(kind==='board'&&w.moving&&body?.dataset.node===w.moving?currentNode(w.moving):null);
   if(n){
    selectNode(n.id);
    gesture={type:'node',pointer:e.pointerId,id:n.id,x:n.x,y:n.y,startX:p.x,startY:p.y,moved:false};
-  }else beginPan(e.pointerId,p,body?.dataset.node||'');
+  }else beginPan(e.pointerId,p,body?.dataset.node||'',true,kind==='board'&&!body?w.moving:'');
  });
  vp.addEventListener('pointermove',e=>{
   if(!pointers.has(e.pointerId)||!gesture||sceneKind!==kind)return;
@@ -552,8 +597,7 @@ function attachWorkspaceGestures(vp){
    vp.scrollLeft=gesture.left-dx;vp.scrollTop=gesture.top-dy;return;
   }
   const n=currentNode(gesture.id);if(!n)return;
-  n.x=Math.max(5,Math.min(sceneModel.width-n.w-5,gesture.x+dx/w.zoom));
-  n.y=Math.max(5,Math.min(sceneModel.height-n.h-5,gesture.y+dy/w.zoom));
+  boundNode(n,gesture.x+dx/w.zoom,gesture.y+dy/w.zoom);
   paintNode(n);
  });
  function finish(e){
@@ -569,7 +613,13 @@ function attachWorkspaceGestures(vp){
   if(g.pointer!==e.pointerId)return;
   if(g.type==='node'&&g.moved){
    if(cancel)restoreDrag();else{const n=currentNode(g.id);if(n)saveNode(n)}
-  }else if(g.type==='pan'&&!g.moved&&g.tap&&!cancel&&g.tapId)selectNode(g.tapId);
+  }else if(g.type==='pan'&&!g.moved&&g.tap&&!cancel){
+   if(g.tapId)selectNode(g.tapId);
+   else if(kind==='board'&&g.placeId&&w.moving===g.placeId){
+    const n=currentNode(g.placeId),p=coordinates(e);
+    if(n){boundNode(n,(vp.scrollLeft+p.x)/w.zoom-n.w/2,(vp.scrollTop+p.y)/w.zoom-n.h/2);paintNode(n);commitBoardPosition(n);suppressClick=true}
+   }
+  }
   gesture=null;
  }
  vp.addEventListener('pointerup',finish);vp.addEventListener('pointercancel',finish);vp.addEventListener('lostpointercapture',finish);
@@ -671,6 +721,7 @@ view.addEventListener('click',e=>{
  case 'save-speech':{const s=currentSpeech();if(s)saveSpeech(s.personal?s.id:'',s);break}
  case 'delete-speech':if(confirm('Удалить свою сохранённую речь?')){state.speechSaved=state.speechSaved.filter(s=>str(s.id)!==id);persist();renderSpeeches()}break;
  case 'select-node':case 'jump-node':selectNode(id,a==='jump-node');break;
+ case 'board-move':toggleBoardMove();break;
  case 'new-pin':editPin();break;
  case 'edit-pin':editPin(id);break;
  case 'delete-pin':deletePin(id);break;
@@ -683,5 +734,6 @@ view.addEventListener('click',e=>{
  case 'open-source':openSource(id);break;
  }
 });
+window.addEventListener('resize',()=>{if(['tree','board'].includes(active)&&$('#workspaceViewport')){resizeWorkspace();paintThreads()}});
 switchChapter('book',{scroll:false});
 })();
