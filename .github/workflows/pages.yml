@@ -26,7 +26,9 @@ jobs:
       - name: Prepare site
         run: |
           mkdir dist
-          cp index.html dist/index.html
+          node --check archive.js
+          node --check speeches.js
+          cp index.html archive.css archive.js speeches.js dist/
           base64 --decode apple-touch-icon.png.b64 > dist/apple-touch-icon.png
           test -s dist/apple-touch-icon.png
       - name: Configure GitHub Pages

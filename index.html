@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#21140f"><title>Похоронная книга Жижеля</title>
+<meta name="theme-color" content="#21140f"><title>Архив Жижеля Плачеля</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bad+Script&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -125,19 +125,23 @@ button.stats-total:hover{border-color:#d7b97e;background:#3a2419}
 </style><link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="180x180" href="./apple-touch-icon.png?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Похоронная книга Жижеля">
+<meta name="apple-mobile-web-app-title" content="Архив Жижеля">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="./archive.css">
 </head>
 <body>
-<header>
-  <div><p class="eyebrow">Личный реестр скорби</p><h1>Похоронная книга Жижеля</h1><p class="subtitle">Память — товар, а горе — ремесло.</p></div>
-  <div class="head-actions">
-    <button class="btn" id="add">＋ Записать имя</button>
-    <button class="btn" id="inkToggle" aria-pressed="false">✒ Роспись</button>
-    <details class="more-tools"><summary>Резервная копия</summary><div class="more-menu"><button class="btn secondary" id="export" type="button">Экспорт JSON</button><button class="btn secondary" id="import" type="button">Импорт JSON</button></div></details>
-    <input id="file" type="file" accept=".json,application/json" hidden>
-  </div>
+<header class="archive-header">
+ <div class="archive-brand"><img src="./apple-touch-icon.png?v=2" alt="" width="62" height="62"><div><p class="eyebrow">Частное собрание · Баровия</p><h1>Архив Жижеля Плачеля</h1><p class="subtitle">Memento mori. Memento pecuniae.</p></div></div>
+ <details class="more-tools"><summary>Резервная копия</summary><div class="more-menu"><button class="btn secondary" id="export" type="button">Экспорт архива</button><button class="btn secondary" id="import" type="button">Импорт архива</button></div></details>
+ <input id="file" type="file" accept=".json,application/json" hidden>
 </header>
+<nav class="archive-nav" aria-label="Разделы архива">
+ <details id="chapterMenu"><summary><span class="chapter-label">Оглавление</span><span id="chapterName">Похоронная книга</span><span class="chapter-chevron" aria-hidden="true">⌄</span></summary>
+ <div id="chapterLinks" class="chapter-links"></div></details>
+</nav>
+<p id="archiveWarning" role="alert" hidden></p>
+<section id="ledgerView" class="archive-view">
+ <div class="ledger-heading"><h2>Похоронная книга</h2><div class="head-actions"><button class="btn" id="add">＋ Записать имя</button><button class="btn secondary" id="inkToggle" aria-pressed="false">✒ Роспись</button></div></div>
 <section class="summary-bar" aria-label="Краткая статистика">
   <div class="summary-facts">
     <div class="summary-fact"><span>В книге записано</span><strong id="peopleSummary">0 человек</strong></div>
@@ -182,7 +186,9 @@ button.stats-total:hover{border-color:#d7b97e;background:#3a2419}
     <canvas class="ink-canvas" id="inkCanvas" aria-label="Поле для росписи"></canvas>
   </div></section>
   <nav class="pagination"><button class="arrow" id="prev" aria-label="Предыдущая страница">‹</button><div class="counter"><span id="counter">Страница 1 из 1</span><small>Листайте книгу</small></div><button class="arrow" id="next" aria-label="Следующая страница">›</button></nav>
-</main><footer>Записи хранятся в этом браузере. Не забывайте делать резервную копию.</footer>
+</main></section>
+<section id="archiveView" class="archive-view" hidden></section>
+<footer>Личный архив · Записи хранятся на этом устройстве. Делайте резервные копии.</footer>
 <div class="modal" id="modal" hidden><section class="dialog"><h2 id="modalTitle">Новая запись</h2><form id="form"><div class="form">
   <div class="field wide"><span>Имя</span><input name="name" maxlength="100" required></div>
   <div class="field"><span>Возраст</span><input name="age" type="number" min="0" max="999"></div>
@@ -217,14 +223,18 @@ const COIN_PARTS=[
 ];
 const COPPER_FORMS=['медная монета','медные монеты','медных монет','медной монеты'];
 const pluralRules=new Intl.PluralRules('ru-RU');
-let pages=[{entries:[],drawings:[]}],page=0,editing=null,expenses=[],editingExpenseId=null;
+let pages=[{entries:[],drawings:[]}],page=0,editing=null,expenses=[],editingExpenseId=null,archiveData={};
 let inkMode='off',selectedStrokeId=null,activeStroke=null,dragState=null,penWidth=3;
 const $=s=>document.querySelector(s);
 const form=$('#form'),expenseForm=$('#expenseForm'),canvas=$('#inkCanvas');
 const ctx=canvas.getContext('2d');
 
 function makeId(){return (crypto&&crypto.randomUUID)?crypto.randomUUID():'id-'+Date.now()+'-'+Math.random().toString(36).slice(2)}
-function save(){localStorage.setItem(KEY,JSON.stringify({pages,page,expenses}))}
+function validArchive(value){return value&&typeof value==='object'&&!Array.isArray(value)?value:{}}
+function save(){
+ try{localStorage.setItem(KEY,JSON.stringify({pages,page,expenses,archive:archiveData}));return true}
+ catch(err){const warning=$('#archiveWarning');if(warning){warning.hidden=false;warning.textContent='Не удалось сохранить изменения. Хранилище браузера недоступно или заполнено. Сделайте экспорт архива.'}return false}
+}
 function normalizeTime(value,fallback){
  if(typeof value==='number'&&Number.isFinite(value)&&value>0)return value;
  if(typeof value==='string'&&value.trim()){
@@ -272,6 +282,7 @@ function load(){
   const data=JSON.parse(localStorage.getItem(KEY)||'null');
   if(data&&Array.isArray(data.pages)){
    const normalized=normalizePages(data.pages,!Array.isArray(data.expenses));
+   archiveData=validArchive(data.archive);
    pages=normalized.pages;
    expenses=Array.isArray(data.expenses)?normalizeExpenses(data.expenses):normalized.legacyExpenses;
    const oldPage=Math.max(0,Math.min(Number(data.page)||0,normalized.pageMap.length-1));
@@ -372,13 +383,14 @@ function render(){
   const status={alive:'Жив',dead:'Мёртв',undead:'Нежить'}[e.status]||'Жив';
   const money=e.amount!==''&&e.amount!=null?esc(e.amount)+' '+esc(e.currency):'не указана';
   const statusClass=['alive','dead','undead'].includes(e.status)?e.status:'alive';
-  return '<article class="entry"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status-wrap">'+statusDrawing(statusClass)+'<span class="entry-status '+statusClass+'">'+status+'</span></span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div><div class="details"><strong>Родня:</strong> '+(e.relatives.length?e.relatives.map(esc).join(' · '):'не указана')+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+e.id+'">Изменить</button><button data-del="'+e.id+'">Удалить</button></div></article>';
+  return '<article class="entry" data-person-id="'+esc(e.id)+'"><div class="entry-head"><span class="entry-name">'+esc(e.name)+'</span><span class="entry-status-wrap">'+statusDrawing(statusClass)+'<span class="entry-status '+statusClass+'">'+status+'</span></span></div><div class="details"><strong>Возраст:</strong> '+(e.age?esc(e.age):'не указан')+' · <strong>Оплата:</strong> '+money+'</div><div class="details"><strong>Родня:</strong> '+(e.relatives.length?e.relatives.map(esc).join(' · '):'не указана')+'</div>'+(e.comment?'<div class="entry-note">'+esc(e.comment)+'</div>':'')+'<div class="entry-actions"><button data-edit="'+esc(e.id)+'">Изменить</button><button data-dossier="'+esc(e.id)+'">Досье</button><button data-del="'+esc(e.id)+'">Удалить</button></div></article>';
  }).join('');
  $('#empty').hidden=p.entries.length>0;
  $('#entries').hidden=!p.entries.length;
  updateStats();
  save();
  requestAnimationFrame(resizeCanvas);
+ window.dispatchEvent(new Event('ledger:change'));
 }
 function openEntry(e){
  editing=e?e.id:null;
@@ -493,8 +505,8 @@ $('#expenseHistory').onclick=e=>{
  }
 };
 $('#export').onclick=()=>{
- const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',pages,page,expenses},null,2)],{type:'application/json'}));
- a.href=u;a.download='zhizhel-ledger-backup.json';a.click();URL.revokeObjectURL(u);
+ const a=document.createElement('a'),u=URL.createObjectURL(new Blob([JSON.stringify({app:'zhizhel-funeral-ledger',version:2,pages,page,expenses,archive:archiveData},null,2)],{type:'application/json'}));
+ a.href=u;a.download='zhizhel-archive-backup.json';a.click();URL.revokeObjectURL(u);
 };
 $('#import').onclick=()=>$('#file').click();
 $('#file').onchange=async e=>{
@@ -502,13 +514,14 @@ $('#file').onchange=async e=>{
  try{
   const data=JSON.parse(await file.text());
   if(data.app!=='zhizhel-funeral-ledger'||!Array.isArray(data.pages))throw Error();
-  if(confirm('Заменить текущую книгу данными из файла?')){
+  if(confirm(data.archive?'Заменить весь текущий архив данными из файла?':'Заменить похоронную книгу? В старой копии нет дополнительных разделов; они будут сохранены.')){
    const normalized=normalizePages(data.pages,!Array.isArray(data.expenses));
+   if(data.archive&&typeof data.archive==='object')archiveData=validArchive(data.archive);
    pages=normalized.pages;
    expenses=Array.isArray(data.expenses)?normalizeExpenses(data.expenses):normalized.legacyExpenses;
    const oldPage=Math.max(0,Math.min(Number(data.page)||0,normalized.pageMap.length-1));
    page=normalized.pageMap[oldPage]??0;
-   selectedStrokeId=null;render();
+   selectedStrokeId=null;render();window.dispatchEvent(new Event('archive:import'));
   }
  }catch(err){alert('Не удалось прочитать резервную копию')}
  e.target.value='';
@@ -665,7 +678,17 @@ $('#export').addEventListener('click',()=>{$('.more-tools').open=false});
 $('#import').addEventListener('click',()=>{$('.more-tools').open=false});
 if(typeof ResizeObserver!=='undefined')new ResizeObserver(resizeCanvas).observe($('.page'));
 window.addEventListener('resize',resizeCanvas);
+window.ZhizhelLedger={
+ getPeople:()=>pages.flatMap((p,index)=>p.entries.map(e=>({...e,pageIndex:index}))),
+ getArchive:()=>archiveData,
+ setArchive:(value)=>{archiveData=validArchive(value);return save()},
+ openPerson:(id)=>{const index=pages.findIndex(p=>p.entries.some(e=>String(e.id)===String(id)));if(index<0)return false;page=index;selectedStrokeId=null;render();requestAnimationFrame(()=>{const el=[...document.querySelectorAll('[data-person-id]')].find(x=>x.dataset.personId===String(id));if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('entry-highlight');setTimeout(()=>el.classList.remove('entry-highlight'),1800)}});return true},
+ refresh:()=>requestAnimationFrame(resizeCanvas)
+};
 load();render();updateInkControls();resizeCanvas();
 })();
 
-</script></body></html>
+</script>
+<script src="./speeches.js"></script>
+<script src="./archive.js"></script>
+</body></html>
