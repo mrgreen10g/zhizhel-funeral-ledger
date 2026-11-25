@@ -222,3 +222,22 @@
  .letter-sheet .hand{font-size:18px}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+
+/* Direct workspace gestures and independent acquaintance cards. */
+.workspace-viewport{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.workspace-viewport:active{cursor:grabbing}
+.workspace-viewport .node-body{cursor:pointer}
+.workspace-viewport .node-grip{touch-action:none}
+.workspace-viewport .node-grip:active{cursor:grabbing}
+#zoomText{white-space:nowrap;min-width:44px;justify-content:center;font-variant-numeric:tabular-nums;color:var(--accent);padding:0 4px}
+.arc-relative-field{min-width:0;margin:0;padding:0;border:0;color:#775337;font:600 15px var(--display)}
+.arc-relative-field legend{margin:0 0 5px;padding:0}
+.arc-relative-field [data-relative-list]{display:grid;gap:7px}
+.arc-relative-row{display:flex;align-items:center;gap:8px}
+.arc-relative-row input{flex:1;min-width:0}
+.arc-relative-row button{flex:0 0 32px;min-height:36px;font-size:23px;text-decoration:none;text-align:center}
+.arc-relative-field [data-relative-add]{margin-top:7px;text-align:left}
+.dossier-list:empty{display:none}
+.dossier-layout:has(.dossier-list:empty){grid-template-columns:minmax(0,1fr)}
+@media(max-width:760px){#zoomText{min-width:36px}.workspace-bar .workspace-options{max-width:calc(100vw - 44px)}}
